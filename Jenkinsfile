@@ -1,9 +1,20 @@
 pipeline {
     agent any
     stages {
-        stage('npm version') {
+        stage('BUILD') {
+            agent {
+                docker {
+                    image 'node:latest'
+                    reuseNode true
+                    args '-p 3000:3000'
+                }
+            }
             steps {
-                sh 'npm --version'
+                sh '''
+                    ls -la
+                    node --version
+                    npm --version
+                '''
             }
         }
     }
