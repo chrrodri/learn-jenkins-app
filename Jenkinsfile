@@ -2,13 +2,13 @@ pipeline {
     agent any
     stages {
         stage('BUILD') {
-            agent {
+           /*  agent {
                 docker {
                     image 'node:latest'
                     reuseNode true
                     args '-p 3000:3000'
                 }
-            }
+            }*/
             steps {
                 sh '''
                     ls -la
@@ -21,13 +21,13 @@ pipeline {
             }
         }
         stage('TEST') {
-            agent {
+           /*  agent {
                 docker {
                     image 'node:latest'
                     reuseNode true
                     args '-p 3000:3000'
                 }
-            }
+            }*/
             steps {
                 sh '''
                     test -f build/index.html
