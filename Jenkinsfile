@@ -10,7 +10,7 @@ pipeline {
 
     environment {
         NODE_IMAGE = 'node:22-alpine'
-        PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
+        PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.39.0-noble'
 
         NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
