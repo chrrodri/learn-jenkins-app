@@ -64,7 +64,7 @@ pipeline {
 
                     steps {
                         sh '''
-                            npm ci
+                            
                             npm test
                         '''
                     }
@@ -88,7 +88,7 @@ pipeline {
 
                     steps {
                         sh '''
-                            npm ci
+                            
 
                             npx serve -s build &
                             SERVER_PID=$!
