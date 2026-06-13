@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages {
-        stage('BUILD') {
+       /* stage('BUILD') {
            agent {
                 docker {
                     image 'node:latest'
@@ -23,7 +23,7 @@ pipeline {
                     npm run build
                 '''
             }
-        }
+        }*/
         stage('TEST') {
              agent {
                 docker {
