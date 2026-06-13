@@ -105,7 +105,7 @@ pipeline {
                         always {
                             publishHTML([
                                 allowMissing: false,
-                                icon: ''
+                                icon: '',
                                 reportDir: 'playwright-report',
                                 reportFiles: 'index.html',
                                 reportName: 'Playwright HTML Report',
