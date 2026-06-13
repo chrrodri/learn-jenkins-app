@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages {
-       /* stage('BUILD') {
+        stage('BUILD') {
            agent {
                 docker {
                     image 'node:latest'
@@ -23,7 +23,7 @@ pipeline {
                     npm run build
                 '''
             }
-        }*/
+        }
         stage('TEST') {
             parallel {
                 stage('Unit Tests') {
@@ -42,7 +42,7 @@ pipeline {
                     }
                     post {
                         always {
-                            junit 'test-results/junit.xml'
+                            junit 'jest-results/junit.xml'
                         }
                     }
                 }
@@ -73,7 +73,7 @@ pipeline {
         }
     
 
-       /* stage('DEPLOY') {
+        stage('DEPLOY') {
              agent {
                 docker {
                     image 'node:latest'
@@ -88,7 +88,7 @@ pipeline {
                     echo "Deploying to production. Site ID = $NETLIFY_SITE_ID"
                 '''
             }
-        }*/
+        }
     }
 
 }
