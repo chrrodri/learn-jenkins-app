@@ -86,7 +86,7 @@ pipeline {
                         }
                     }
 
-                    steps {
+/*                     steps {
                         sh '''
                             
 
@@ -119,7 +119,7 @@ pipeline {
                                              allowEmptyArchive: true
                         }
                     }
-                }
+                } */
             }
         }
         stage('Deploy STAGE') {
