@@ -122,8 +122,7 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy to Netlify') {
+        stage('Deploy STAGE') {
 
             agent {
                 docker {
@@ -142,7 +141,34 @@ pipeline {
 
                     npm install -g netlify-cli@20.12.2
 
-                    echo "Deploying to Netlify..."
+                    echo "Deploying to Staging..."
+                    netlify deploy \
+                        --dir=build \
+                        --site=$NETLIFY_SITE_ID
+                '''
+            }
+        }
+    
+        stage('Deploy PROD') {
+
+            agent {
+                docker {
+                    image "${NODE_IMAGE}"
+                    reuseNode true
+                }
+            }
+
+            when {
+                branch 'main'
+            }
+
+            steps {
+                sh '''
+                    npm ci
+
+                    npm install -g netlify-cli@20.12.2
+
+                    echo "Deploying to Production..."
                     netlify deploy \
                         --dir=build \
                         --prod \
