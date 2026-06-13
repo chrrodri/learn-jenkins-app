@@ -8,9 +8,16 @@ pipeline {
 
             stages {
                 stage('Sast Secret Scan') {
+                    agent {
+                        docker { 
+                            image 'zricethezav/gitleaks:latest'
+                            // Mount the workspace correctly for git history scans
+                            args '-u root -v ${WORKSPACE}:/workspace' 
+                        }
+                    }
                     steps {
                         sh 'echo "Running SAST Secret Scan with Gitleaks"'
-                        //sh 'gitleaks detect --source .'
+                        sh 'gitleaks detect --source .'
                         
                     }
                 }
