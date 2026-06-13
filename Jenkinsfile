@@ -3,7 +3,7 @@ pipeline {
 
     options {
         timestamps()
-        //ansiColor('xterm')
+        ansiColor('xterm')
         skipStagesAfterUnstable()
         timeout(time: 30, unit: 'MINUTES')
     }
@@ -104,11 +104,15 @@ pipeline {
                     post {
                         always {
                             publishHTML([
+                                allowMissing: false,
+                                icon: ''
                                 reportDir: 'playwright-report',
                                 reportFiles: 'index.html',
-                                reportName: 'Playwright Report',
-                                keepAll: true,
-                                alwaysLinkToLastBuild: true
+                                reportName: 'Playwright HTML Report',
+                                reportTitles: '', 
+                                useWrapperFileDirectly: true,
+                                keepAll: false,
+                                alwaysLinkToLastBuild: false
                             ])
 
                             archiveArtifacts artifacts: 'playwright-report/**',
