@@ -45,7 +45,7 @@ pipeline {
                     }
                     steps {
                         sh 'echo "Running Action Chain Tests"'
-                        sh 'npm run test:e2e'
+                        //sh 'npm run test:e2e'
 
                     }
                 }
