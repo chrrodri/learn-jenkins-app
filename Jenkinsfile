@@ -3,7 +3,7 @@ pipeline {
 
     options {
         timestamps()
-        ansiColor('xterm')
+        //ansiColor('xterm')
         skipStagesAfterUnstable()
         timeout(time: 30, unit: 'MINUTES')
     }
