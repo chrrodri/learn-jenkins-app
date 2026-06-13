@@ -12,7 +12,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Eduardo es Joto
+          Learn Jenkins on Udemy
         </a>
       </header>
       <p>
