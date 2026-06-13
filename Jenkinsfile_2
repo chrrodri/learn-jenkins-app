@@ -1,6 +1,22 @@
 pipeline {
 
-    agent any
+    agent none
+
+    options {
+        timestamps()
+        //ansiColor('xterm')
+        skipStagesAfterUnstable()
+        //timeout(time: 30, unit: 'MINUTES')
+    }
+
+    environment {
+        NODE_IMAGE = 'node:22-alpine'
+        PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
+        AWS_IMAGE = 'amazon/aws-cli:2.7.19'
+
+        NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+    }
 
     stages {
 
@@ -39,21 +55,29 @@ pipeline {
                 stage('Action Chain Tests') {
                     agent {
                         docker {
-                            image 'node:24-alpine'
+                            image "${PLAYWRIGHT_IMAGE}"
                             reuseNode true
                         }
                     }
-                    steps {
-                        sh 'echo "Running Action Chain Tests"'
-                        //sh 'npm run test:e2e'
 
+                    steps {
+                        sh '''
+                            npx serve -s build &
+                            SERVER_PID=$!
+
+                            sleep 10
+                            npx playwright install chromium --with-deps
+                            npx playwright test --reporter=html
+
+                            kill $SERVER_PID
+                        '''
                     }
                 }
 
                 stage('Unit Tests') {
                     agent {
                         docker {
-                            image 'node:24-alpine'
+                            image "${NODE_IMAGE}"
                             reuseNode true
                         }
                     }
@@ -66,17 +90,29 @@ pipeline {
                 stage('Package') {
                     agent {
                         docker {
-                            image 'node:24-alpine'
+                            image "${NODE_IMAGE}"
                             reuseNode true
                         }
                     }
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh 'npm run build'
+                        
+                    }
+                    post {
+                        success {
+                            archiveArtifacts artifacts: 'build/**', fingerprint: true
+                        }
                     }
                 }
 
                 stage('Publish') {
+                    agent {
+                        docker {
+                            image "${AWS_IMAGE}"
+                            reuseNode true
+                        }
+                    }
                     steps {
                         /*sh '''
                         aws s3 cp dist.zip \
