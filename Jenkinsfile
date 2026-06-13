@@ -94,7 +94,7 @@ pipeline {
                             SERVER_PID=$!
 
                             sleep 10
-
+                            npx playwright install chromium --with-deps
                             npx playwright test --reporter=html
 
                             kill $SERVER_PID
