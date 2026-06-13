@@ -1,129 +1,143 @@
 pipeline {
-
     agent any
+
+    environment {
+        NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
+    }
 
     stages {
 
-        stage('BUILD') {
+        stage('Docker') {
+            steps {
+                sh 'docker build -t my-playwright .'
+            }
+        }
 
-            stages {
-                stage('Sast Secret Scan') {
-                    steps {
-                        sh 'echo "Running SAST Secret Scan with Gitleaks"'
-                        //sh 'gitleaks detect --source .'
-                        
-                    }
+        stage('Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
                 }
+            }
+            steps {
+                sh '''
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la
+                '''
+            }
+        }
 
-                stage('Code Scan') {
-                    steps {
-                        //sh 'sonar-scanner'
-                        sh 'echo "Running Code Scan with SonarQube"'
-                    }
-                }
-
-                stage('Sast Fortify') {
-                    steps {
-                        //sh './fortify.sh'
-                        sh 'echo "Running SAST Fortify Scan"'
-                    }
-                }
-
-                stage('Sast Security Scan') {
-                    steps {
-                        //sh 'trivy fs .'
-                        sh 'echo "Running SAST Security Scan with Trivy"'
-                    }
-                }
-
-                stage('Action Chain Tests') {
+        stage('Tests') {
+            parallel {
+                stage('Unit tests') {
                     agent {
                         docker {
-                            image 'node:24-alpine'
+                            image 'node:18-alpine'
                             reuseNode true
                         }
                     }
-                    steps {
-                        sh 'echo "Running Action Chain Tests"'
-                        //sh 'npm run test:e2e'
 
+                    steps {
+                        sh '''
+                            #test -f build/index.html
+                            npm test
+                        '''
+                    }
+                    post {
+                        always {
+                            junit 'jest-results/junit.xml'
+                        }
                     }
                 }
 
-                stage('Unit Tests') {
+                stage('E2E') {
                     agent {
                         docker {
-                            image 'node:24-alpine'
+                            image 'my-playwright'
                             reuseNode true
                         }
                     }
-                    steps {
-                        sh 'echo "Running Unit Tests"'
-                        sh 'npm test'
-                    }
-                }
 
-                stage('Package') {
-                    agent {
-                        docker {
-                            image 'node:24-alpine'
-                            reuseNode true
+                    steps {
+                        sh '''
+                            serve -s build &
+                            sleep 10
+                            npx playwright test  --reporter=html
+                        '''
+                    }
+
+                    post {
+                        always {
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Local E2E', reportTitles: '', useWrapperFileDirectly: true])
                         }
-                    }
-                    steps {
-                        sh 'echo "Running Package Stage"'
-                        sh 'npm run build'
-                    }
-                }
-
-                stage('Publish') {
-                    steps {
-                        /*sh '''
-                        aws s3 cp dist.zip \
-                        s3://artifacts-bucket/
-                        '''*/
-                        sh 'echo "Running Publish Stage"'
                     }
                 }
             }
         }
 
-        stage('DEPLOY') {
-            stages {
-                stage('Deploy') {
-                    steps {
-                        //sh 'kubectl apply -f deployment.yaml'
-                        sh 'echo "Running Deploy Stage"'
-                    }
+        stage('Deploy staging') {
+            agent {
+                docker {
+                    image 'my-playwright'
+                    reuseNode true
+                }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
+            }
+
+            steps {
+                sh '''
+                    netlify --version
+                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
+                    netlify status
+                    netlify deploy --dir=build --json > deploy-output.json
+                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
+                    npx playwright test  --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
 
-        stage('TEST') {
-            stages {
-                stage('Integration Tests') {
-                    steps {
-                       //sh './integration-tests.sh'
-                        sh 'echo "Running Integration Tests"'
-                    }
+        stage('Deploy prod') {
+            agent {
+                docker {
+                    image 'my-playwright'
+                    reuseNode true
                 }
-                stage('Gelato Scan') {
-                    steps {
-                        //sh './integration-tests.sh'
-                        sh 'echo "Running Gelato Scan"'
-                    }
-                }
-                stage('Custom Security Check') {
-                    steps {
-                        //sh './integration-tests.sh'
-                        sh 'echo "Running Custom Security Check"'
-                    }
-                }
-                 stage('Gat Itaas') {
-                    steps {
-                        //sh './integration-tests.sh'
-                        sh 'echo "Running Gat Itaas"'
-                    }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = 'YOUR NETLIFY SITE URL'
+            }
+
+            steps {
+                sh '''
+                    node --version
+                    netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    netlify status
+                    netlify deploy --dir=build --prod
+                    npx playwright test  --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
                 }
             }
         }
