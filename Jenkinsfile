@@ -31,7 +31,7 @@ pipeline {
                     echo "Node version:"
                     node --version
 
-                    echo "NPM versions:"
+                    echo "NPM version:"
                     npm --version
 
                     echo "Installing dependencies..."
