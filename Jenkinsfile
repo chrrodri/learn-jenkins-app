@@ -51,6 +51,8 @@ pipeline {
 
         stage('Tests') {
 
+            parallel {
+
                 stage('Unit Tests') {
 
                     agent {
@@ -118,6 +120,7 @@ pipeline {
                         }
                     }
                 }
+            }
         }
 
         stage('Deploy to Netlify') {
