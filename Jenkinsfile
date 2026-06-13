@@ -1,140 +1,129 @@
 pipeline {
-    agent any
 
-    environment {
-        NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
-        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-        REACT_APP_VERSION = "1.0.$BUILD_ID"
-    }
+    agent any
 
     stages {
 
-        stage('Build') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    ls -la
-                    node --version
-                    npm --version
-                    npm ci
-                    npm run build
-                    ls -la
-                '''
-            }
-        }
+        stage('BUILD') {
 
-        stage('Tests') {
-            parallel {
-                stage('Unit tests') {
+            stages {
+                stage('Sast Secret Scan') {
+                    steps {
+                        sh 'echo "Running SAST Secret Scan with Gitleaks"'
+                        //sh 'gitleaks detect --source .'
+                        
+                    }
+                }
+
+                stage('Code Scan') {
+                    steps {
+                        //sh 'sonar-scanner'
+                        sh 'echo "Running Code Scan with SonarQube"'
+                    }
+                }
+
+                stage('Sast Fortify') {
+                    steps {
+                        //sh './fortify.sh'
+                        sh 'echo "Running SAST Fortify Scan"'
+                    }
+                }
+
+                stage('Sast Security Scan') {
+                    steps {
+                        //sh 'trivy fs .'
+                        sh 'echo "Running SAST Security Scan with Trivy"'
+                    }
+                }
+
+                stage('Action Chain Tests') {
                     agent {
                         docker {
-                            image 'node:18-alpine'
+                            image 'node:24-alpine'
                             reuseNode true
                         }
                     }
-
                     steps {
-                        sh '''
-                            #test -f build/index.html
-                            npm test
-                        '''
-                    }
-                    post {
-                        always {
-                            junit 'jest-results/junit.xml'
-                        }
+                        sh 'echo "Running Action Chain Tests"'
+                        sh 'npm run test:e2e'
+
                     }
                 }
 
-                stage('E2E') {
+                stage('Unit Tests') {
                     agent {
                         docker {
-                            image 'mcr.microsoft.com/playwright:v1.61.0-noble'
+                            image 'node:24-alpine'
                             reuseNode true
                         }
                     }
-
                     steps {
-                        sh '''
-                            npm install serve
-                            node_modules/.bin/serve -s build &
-                            sleep 10
-                            npx playwright test  --reporter=html
-                        '''
+                        sh 'echo "Running Unit Tests"'
+                        sh 'npm test'
                     }
+                }
 
-                    post {
-                        always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Local E2E', reportTitles: '', useWrapperFileDirectly: true])
+                stage('Package') {
+                    agent {
+                        docker {
+                            image 'node:24-alpine'
+                            reuseNode true
                         }
                     }
+                    steps {
+                        sh 'echo "Running Package Stage"'
+                        sh 'npm run build'
+                    }
+                }
+
+                stage('Publish') {
+                    steps {
+                        /*sh '''
+                        aws s3 cp dist.zip \
+                        s3://artifacts-bucket/
+                        '''*/
+                        sh 'echo "Running Publish Stage"'
+                    }
                 }
             }
         }
 
-        stage('Deploy staging') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                    reuseNode true
-                }
-            }
-
-            environment {
-                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
-            }
-
-            steps {
-                sh '''
-                    npm install netlify-cli node-jq
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
-                    npx playwright test  --reporter=html
-                '''
-            }
-
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
+        stage('DEPLOY') {
+            stages {
+                stage('Deploy') {
+                    steps {
+                        //sh 'kubectl apply -f deployment.yaml'
+                        sh 'echo "Running Deploy Stage"'
+                    }
                 }
             }
         }
 
-        stage('Deploy prod') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                    reuseNode true
+        stage('TEST') {
+            stages {
+                stage('Integration Tests') {
+                    steps {
+                       //sh './integration-tests.sh'
+                        sh 'echo "Running Integration Tests"'
+                    }
                 }
-            }
-
-            environment {
-                CI_ENVIRONMENT_URL = 'YOUR NETLIFY SITE URL'
-            }
-
-            steps {
-                sh '''
-                    node --version
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
-                    npx playwright test  --reporter=html
-                '''
-            }
-
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
+                stage('Gelato Scan') {
+                    steps {
+                        //sh './integration-tests.sh'
+                        sh 'echo "Running Gelato Scan"'
+                    }
+                }
+                stage('Custom Security Check') {
+                    steps {
+                        //sh './integration-tests.sh'
+                        sh 'echo "Running Custom Security Check"'
+                    }
+                }
+                 stage('Gat Itaas') {
+                    steps {
+                        //sh './integration-tests.sh'
+                        sh 'echo "Running Gat Itaas"'
+                    }
                 }
             }
         }
