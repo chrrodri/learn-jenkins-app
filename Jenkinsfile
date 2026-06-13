@@ -1,145 +1,195 @@
 pipeline {
-    agent any
+    agent none
+
+    options {
+        timestamps()
+        //ansiColor('xterm')
+        skipStagesAfterUnstable()
+        //timeout(time: 30, unit: 'MINUTES')
+    }
 
     environment {
+        NODE_IMAGE = 'node:22-alpine'
+        PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
+
         NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-        REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
 
     stages {
 
-        stage('Docker') {
-            steps {
-                sh 'docker build -t my-playwright .'
-            }
-        }
-
         stage('Build') {
             agent {
                 docker {
-                    image 'node:18-alpine'
+                    image "${NODE_IMAGE}"
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
-                    ls -la
+                    echo "Node version:"
                     node --version
+
+                    echo "NPM version:"
                     npm --version
+
+                    echo "Installing dependencies..."
                     npm ci
+
+                    echo "Building application..."
                     npm run build
-                    ls -la
                 '''
+            }
+
+            post {
+                success {
+                    archiveArtifacts artifacts: 'build/**', fingerprint: true
+                }
             }
         }
 
         stage('Tests') {
+
             parallel {
-                stage('Unit tests') {
+
+                stage('Unit Tests') {
+
                     agent {
                         docker {
-                            image 'node:18-alpine'
+                            image "${NODE_IMAGE}"
                             reuseNode true
                         }
                     }
 
                     steps {
                         sh '''
-                            #test -f build/index.html
+                            
                             npm test
                         '''
                     }
+
                     post {
                         always {
-                            junit 'jest-results/junit.xml'
+                            junit allowEmptyResults: true,
+                                  testResults: 'jest-results/*.xml'
                         }
                     }
                 }
 
-                stage('E2E') {
+                stage('E2E Tests') {
+
                     agent {
                         docker {
-                            image 'my-playwright'
+                            image "${PLAYWRIGHT_IMAGE}"
                             reuseNode true
                         }
                     }
 
                     steps {
                         sh '''
-                            serve -s build &
+                            
+
+                            npx serve -s build &
+                            SERVER_PID=$!
+
                             sleep 10
-                            npx playwright test  --reporter=html
+                            npx playwright install chromium --with-deps
+                            npx playwright test --reporter=html
+
+                            kill $SERVER_PID
                         '''
                     }
 
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Local E2E', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([
+                                allowMissing: false,
+                                icon: '',
+                                reportDir: 'playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright HTML Report',
+                                reportTitles: '', 
+                                useWrapperFileDirectly: true,
+                                keepAll: false,
+                                alwaysLinkToLastBuild: false
+                            ])
+
+                            archiveArtifacts artifacts: 'playwright-report/**',
+                                             allowEmptyArchive: true
                         }
                     }
                 }
             }
         }
+        stage('Deploy STAGE') {
 
-        stage('Deploy staging') {
             agent {
                 docker {
-                    image 'my-playwright'
+                    image "${NODE_IMAGE}"
                     reuseNode true
                 }
             }
 
-            environment {
-                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
+            when {
+                branch 'main'
             }
 
             steps {
                 sh '''
-                    netlify --version
-                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
-                    npx playwright test  --reporter=html
-                '''
-            }
+                    npm ci
 
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
-                }
+                    npm install -g netlify-cli@20.12.2
+
+                    echo "Deploying to Staging..."
+                    netlify deploy \
+                        --dir=build \
+                        --site=$NETLIFY_SITE_ID
+                '''
             }
         }
+    
+        stage('Deploy PROD') {
 
-        stage('Deploy prod') {
             agent {
                 docker {
-                    image 'my-playwright'
+                    image "${NODE_IMAGE}"
                     reuseNode true
                 }
             }
 
-            environment {
-                CI_ENVIRONMENT_URL = 'YOUR NETLIFY SITE URL'
+            when {
+                branch 'main'
             }
 
             steps {
                 sh '''
-                    node --version
-                    netlify --version
-                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build --prod
-                    npx playwright test  --reporter=html
+                    npm ci
+
+                    npm install -g netlify-cli@20.12.2
+
+                    echo "Deploying to Production..."
+                    netlify deploy \
+                        --dir=build \
+                        --prod \
+                        --site=$NETLIFY_SITE_ID
                 '''
             }
+        }
+    }
 
-            post {
-                always {
-                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Prod E2E', reportTitles: '', useWrapperFileDirectly: true])
-                }
-            }
+    post {
+
+        success {
+            echo "Pipeline completed successfully."
+        }
+
+        failure {
+            echo "Pipeline failed."
+        }
+
+        always {
+            cleanWs()
         }
     }
 }
