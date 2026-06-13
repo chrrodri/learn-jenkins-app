@@ -25,39 +25,44 @@ pipeline {
             }
         }*/
         stage('TEST') {
-             agent {
-                docker {
-                    image 'node:latest'
-                    reuseNode true
-                    args '-p 3000:3000'
+            parallel {
+                stage('Unit Tests') {
+                    agent {
+                        docker {
+                            image 'node:latest'
+                            reuseNode true
+                            args '-p 3000:3000'
+                        }
+                    }
+                    steps {
+                        sh '''
+                            test -f build/index.html
+                            npm test
+                        '''
+                    }
                 }
-            }
-            steps {
-                sh '''
-                    test -f build/index.html
-                    npm test
-                '''
+
+                stage('E2E Tests') {
+                    agent {
+                        docker {
+                            
+                            image 'mrc.microsoft.com/playwright:v1.61.0-jammy'
+                            reuseNode true
+                            args '-p 3000:3000'
+                        }
+                    }
+                    steps {
+                        sh '''
+                            npm install serve
+                            node_modules/.bin/serve -s build &
+                            sleep 20
+                            npx playwright test --reporter=html
+                        '''
+                    }
+                }
             }
         }
 
-        stage('E2E') {
-             agent {
-                docker {
-                    
-                    image 'mrc.microsoft.com/playwright:v1.61.0-jammy'
-                    reuseNode true
-                    args '-p 3000:3000'
-                }
-            }
-            steps {
-                sh '''
-                    npm install serve
-                    node_modules/.bin/serve -s build &
-                    sleep 20
-                    npx playwright test --reporter=html
-                '''
-            }
-        }
         stage('DEPLOY') {
              agent {
                 docker {
