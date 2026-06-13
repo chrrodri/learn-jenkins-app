@@ -73,7 +73,7 @@ pipeline {
         }
     
 
-        stage('DEPLOY') {
+       /* stage('DEPLOY') {
              agent {
                 docker {
                     image 'node:latest'
@@ -88,7 +88,7 @@ pipeline {
                     echo "Deploying to production. Site ID = $NETLIFY_SITE_ID"
                 '''
             }
-        }
+        }*/
     }
 
 }
