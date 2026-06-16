@@ -113,13 +113,13 @@ pipeline {
                 }
 
                 stage('Publish') {
-                     agent {
+/*                      agent {
                         docker {
                             image "${AWS_IMAGE}"
                             args "--entrypoint=''"
                             reuseNode true
                         }
-                    } 
+                    }  */
                     withCredentials([usernamePassword(credentialsId: 'AWS-chrrodri', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                         steps {
                             sh '''
