@@ -113,19 +113,23 @@ pipeline {
                 }
 
                 stage('Publish') {
-/*                     agent {
+                     agent {
                         docker {
                             image "${AWS_IMAGE}"
+                            args "--entrypoint=''"
                             reuseNode true
                         }
-                    } */
-                    steps {
-                        sh '''
-                        aws s3 cp build.zip \
-                        s3://chrrodri-build-artifacts/
-                        '''
-                        sh 'echo "Running Publish Stage"'
+                    } 
+                    withCredentials([usernamePassword(credentialsId: 'AWS-chrrodri', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                        steps {
+                            sh '''
+                            aws --version
+                            aws s3 cp build.zip \
+                            s3://chrrodri-build-artifacts/build.zip
+                            '''
+                        }
                     }
+
                 }
             }
         }
