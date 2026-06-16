@@ -120,8 +120,8 @@ pipeline {
                             reuseNode true
                         }
                     }  */
-                    withCredentials([usernamePassword(credentialsId: 'AWS-chrrodri', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                        steps {
+                    steps {
+                        withCredentials([usernamePassword(credentialsId: 'AWS-chrrodri', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                             sh '''
                             aws --version
                             aws s3 cp build.zip \
