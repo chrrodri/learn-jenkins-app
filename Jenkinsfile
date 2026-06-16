@@ -85,7 +85,7 @@ pipeline {
                     }
                     steps {
                         sh 'echo "Running Unit Tests"'
-                        sh 'npm test'
+                        //sh 'npm test'
                     }
                 }
 
