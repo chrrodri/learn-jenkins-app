@@ -99,7 +99,7 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
-                            npm ci
+                            //npm ci
                             npm run build
                             zip -r build.zip build
                         '''
