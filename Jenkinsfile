@@ -25,9 +25,9 @@ pipeline {
             stages {
                 stage('Sast Secret Scan') {
                     steps {
-                        sh 'echo "Running SAST Secret Scan with Gitleaks"'
                         //sh 'gitleaks detect --source .'
-                        
+                        sh 'echo "Running SAST Secret Scan with Gitleaks..."'
+        
                     }
                 }
 
