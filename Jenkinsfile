@@ -94,11 +94,12 @@ pipeline {
                     agent {
                         docker {
                             image 'aquasec/trivy:latest'
+                            args '--entrypoint=""'
                             reuseNode true
                         }
                     }
                     steps {
-
+                    sh 'echo "Running SAST Security Scan with Trivy"'        
                     sh '''
                         trivy fs \
                         --scanners vuln,secret \
