@@ -132,6 +132,7 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
+                            npm install
                             npm ci
                             npx playwright test 
                         '''  
