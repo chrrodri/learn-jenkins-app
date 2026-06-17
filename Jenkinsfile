@@ -21,7 +21,7 @@ pipeline {
         stage('BUILD') {
 
             stages {
-/*                 stage('Sast Secret Scan') {
+                 stage('Sast Secret Scan') {
                     agent {
                         docker {
                             image 'zricethezav/gitleaks:latest'
@@ -89,7 +89,7 @@ pipeline {
                             archiveArtifacts artifacts: 'semgrep-report.json'
                         }
                     }  
-                } */
+                }
               stage('Sast Security Scan') {
                     agent {
                         docker {
@@ -98,7 +98,6 @@ pipeline {
                         }
                     }
                     steps {
-                    //sh 'echo "Running SAST Security Scan with Trivy"'
 
                     sh '''
                         trivy fs \
