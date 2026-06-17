@@ -134,8 +134,9 @@ pipeline {
                         sh '''
                             node --version
                             npm --version
-                            npm list @playwright/test
+                            npm install
                             npm ci
+                            npm list @playwright/test
                             npx playwright test 
                         '''  
                     }
