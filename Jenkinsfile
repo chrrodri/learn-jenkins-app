@@ -161,9 +161,27 @@ pipeline {
                     }
                     steps {
                         sh 'echo "Running Unit Tests"'
-                        npm test
+
+                        sh '''
+                            npm ci
+                            CI=true npm test:ci
+                        '''
                     }
-                } 
+                    post {
+                        always {
+                            junit allowEmptyResults: true,
+                                testResults: 'test-results/junit.xml'
+
+                            archiveArtifacts(
+                                artifacts: '''
+                                    coverage/**,
+                                    test-results/**
+                                ''',
+                                allowEmptyArchive: true
+                            )
+                        }
+                    }
+                }
 
                  stage('Package') {
                     agent {
@@ -175,15 +193,23 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
-   
+                            npm ci
                             npm run build
-                            zip -r build.zip build
+                            zip -r build-${APP_VERSION}.zip build
                         '''
                         
                     }
                     post {
                         success {
-                            archiveArtifacts artifacts: 'build.zip', fingerprint: true
+                            archiveArtifacts(
+                                artifacts: 'build-${APP_VERSION}.zip',
+                                fingerprint: true
+                            )
+
+                            archiveArtifacts(
+                                artifacts: 'build/**',
+                                fingerprint: true
+                            )
                         }
                     }
                 } 
