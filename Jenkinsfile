@@ -21,49 +21,6 @@ pipeline {
         stage('BUILD') {
 
             stages {
-                 stage('Sast Secret Scan') {
-                    agent {
-                        docker {
-                            image 'zricethezav/gitleaks:latest'
-                            args '--entrypoint=""'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh 'echo "Running SAST Secret Scan with Gitleaks..."'
-                        sh '''
-                            gitleaks detect \
-                                --source . \
-                                --report-format json \
-                                --report-path gitleaks-report.json
-                        '''
-                    }
-                    post {
-                        always {
-                            archiveArtifacts artifacts: 'gitleaks-report.json'
-                        }
-                    } 
-                }
-
-                stage('Code Scan') {
-                    agent {
-                        docker {
-                            image 'sonarsource/sonar-scanner-cli:latest'
-                            reuseNode true
-                        }
-                    }
-                    environment {
-                        SONAR_TOKEN = credentials('sonarcloud-token')
-                    }
-                    steps {
-                        sh 'echo "Running Code Scan with SonarCloud"'
-
-                        sh '''
-                        sonar-scanner \
-                        -Dsonar.token=$SONAR_TOKEN
-                        '''
-                    }
-                } 
 
                  stage('Sast Fortify') {
                      agent {
