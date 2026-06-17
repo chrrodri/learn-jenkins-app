@@ -80,7 +80,8 @@ pipeline {
                             semgrep scan \
                             --config auto \
                             --json \
-                            --output semgrep-report.json
+                            --output semgrep-report.json \
+                            /src
                         '''
                     }
                      post {
