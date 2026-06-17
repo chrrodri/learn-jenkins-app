@@ -196,7 +196,7 @@ pipeline {
                     }
                 }
             }
-        } */
+        }
 
          stage('TEST') {
             stages {
