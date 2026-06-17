@@ -99,7 +99,6 @@ pipeline {
                     }
                     steps {
                     sh 'echo "Running SAST Security Scan with Trivy"'
-
                     sh '''
                         trivy fs \
                         --scanners vuln,secret \
@@ -116,17 +115,17 @@ pipeline {
                 } 
 
                  stage('Action Chain Tests') {
-/*                     agent {
+                     agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
                             reuseNode true
                         }
-                    }  */
+                    }  
 
                     steps {
-                        sh 'echo "Running SAST Security Scan with Trivy"'
+                        sh 'echo "Running E2E Tests with Playwright"'
                         
-/*                         sh '''
+                        sh '''
                             npx serve -s build &
                             SERVER_PID=$!
 
@@ -135,10 +134,10 @@ pipeline {
                             npx playwright test --reporter=html
 
                             kill $SERVER_PID
-                        '''  */
+                        '''  
                     }
                 } 
-/* 
+ 
                 stage('Unit Tests') {
                     agent {
                         docker {
