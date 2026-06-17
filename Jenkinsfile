@@ -30,19 +30,19 @@ pipeline {
                 }
 
                 stage('Code Scan') {
-                    agent {
+/*                     agent {
                         docker {
                             image 'sonarsource/sonar-scanner-cli:latest'
                             reuseNode true
                         }
-                    } 
+                    }  */
                     steps {
                         sh 'echo "Running Code Scan with SonarQube"'
-                        withSonarQubeEnv('SonarQube') {
+/*                         withSonarQubeEnv('SonarQube') {
                             sh '''
                                 sonar-scanner -X
                             '''
-                        }
+                        }*/
                     }
                 } 
 
