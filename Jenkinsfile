@@ -66,22 +66,27 @@ pipeline {
                 } 
 
                  stage('Sast Fortify') {
-/*                     agent {
+                     agent {
                         docker {
-                            image 'fortifydocker/fortify-ci-tools:latest-jdk-8'
+                            image 'semgrep/semgrep'
                             reuseNode true
                         }
-                    } */
+                    } 
                     steps {
-                        sh 'echo "Running SAST Fortify Scan"'
-/*                         sh 'chmod +x fortify.sh'
-                        sh './fortify.sh' */
+                        sh 'echo "Running SAST Scan with Semgrep"'
+
+                        sh '''
+                            semgrep scan \
+                            --config auto \
+                            --json \
+                            --output semgrep-report.json
+                        '''
                     }
-/*                     post {
+                     post {
                         always {
-                            archiveArtifacts artifacts: '*.fpr'
+                            archiveArtifacts artifacts: 'semgrep-report.json'
                         }
-                    }  */
+                    }  
                 }
               stage('Sast Security Scan') {
                     steps {
