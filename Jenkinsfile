@@ -13,10 +13,6 @@ pipeline {
         NODE_IMAGE = 'node:22-alpine'
         PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
         AWS_IMAGE = 'amazon/aws-cli:2.7.19'
-
-        NETLIFY_SITE_ID = '64541461-c8d3-4288-8b22-2818a9bc0f4e'
-        NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-
         APP_VERSION = "1.0.${env.BUILD_NUMBER}"
     }
 
@@ -57,7 +53,7 @@ pipeline {
                             archiveArtifacts artifacts: '*.fpr'
                         }
                     } 
-
+                }
 /*              stage('Sast Security Scan') {
                     steps {
                         //sh 'trivy fs .'
@@ -137,7 +133,7 @@ pipeline {
                 } */
             }
         }
-
+    
 /*         stage('DEPLOY') {
             stages {
                 stage('Deploy') {
