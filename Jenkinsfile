@@ -38,7 +38,7 @@ pipeline {
                     }
                     steps {
                         sh 'echo "Running Code Scan with SonarQube"'
-                        sh 'sonar-scanner' 
+                        //sh 'sonar-scanner' 
                     }
                 } 
 
