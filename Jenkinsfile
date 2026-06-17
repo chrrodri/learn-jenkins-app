@@ -52,7 +52,11 @@ pipeline {
                         sh 'chmod +x fortify.sh'
                         sh './fortify.sh'
                     }
-                } 
+                    post {
+                        always {
+                            archiveArtifacts artifacts: '*.fpr'
+                        }
+                    } 
 
 /*              stage('Sast Security Scan') {
                     steps {
