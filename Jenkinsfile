@@ -30,59 +30,66 @@ pipeline {
                 }
 
                 stage('Code Scan') {
-/*                     agent {
+                    agent {
                         docker {
                             image 'sonarsource/sonar-scanner-cli:latest'
                             reuseNode true
                         }
-                    }  */
+                    }
+                    environment {
+                        SONAR_TOKEN = credentials('sonarcloud-token')
+                    }
                     steps {
-                        sh 'echo "Running Code Scan with SonarQube"'
-/*                         withSonarQubeEnv('SonarQube') {
-                            sh '''
-                                sonar-scanner -X
-                            '''
-                        }*/
+                        sh 'echo "Running Code Scan with SonarCloud"'
+
+                        sh '''
+                        sonar-scanner \
+                        -Dsonar.projectKey=chrrodri_learn-jenkins-app \
+                        -Dsonar.organization=chrrodri \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=https://sonarcloud.io \
+                        -Dsonar.token=$SONAR_TOKEN
+                        '''
                     }
                 } 
 
                  stage('Sast Fortify') {
-                    agent {
+/*                     agent {
                         docker {
                             image 'fortifydocker/fortify-ci-tools:latest-jdk-8'
                             reuseNode true
                         }
-                    }
+                    } */
                     steps {
                         sh 'echo "Running SAST Fortify Scan"'
-                        sh 'chmod +x fortify.sh'
-                        sh './fortify.sh'
+/*                         sh 'chmod +x fortify.sh'
+                        sh './fortify.sh' */
                     }
-                    post {
+/*                     post {
                         always {
                             archiveArtifacts artifacts: '*.fpr'
                         }
-                    } 
+                    }  */
                 }
-/*              stage('Sast Security Scan') {
+              stage('Sast Security Scan') {
                     steps {
-                        //sh 'trivy fs .'
+                        sh 'trivy fs .'
                         sh 'echo "Running SAST Security Scan with Trivy"'
                     }
-                } */
+                } 
 
-/*                 stage('Action Chain Tests') {
-                    agent {
+                 stage('Action Chain Tests') {
+/*                     agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
                             reuseNode true
                         }
-                    } */
+                    }  */
 
-/*                     steps {
+                    steps {
                         sh 'echo "Running SAST Security Scan with Trivy"'
                         
-                        sh '''
+/*                         sh '''
                             npx serve -s build &
                             SERVER_PID=$!
 
@@ -91,9 +98,9 @@ pipeline {
                             npx playwright test --reporter=html
 
                             kill $SERVER_PID
-                        ''' 
+                        '''  */
                     }
-                } */
+                } 
 /* 
                 stage('Unit Tests') {
                     agent {
