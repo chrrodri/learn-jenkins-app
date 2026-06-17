@@ -91,9 +91,20 @@ pipeline {
                     }  
                 }
               stage('Sast Security Scan') {
+                    agent {
+                        docker {
+                            image 'aquasec/trivy:latest'
+                            reuseNode true
+                        }
+                    }
                     steps {
-                        sh 'trivy fs .'
-                        sh 'echo "Running SAST Security Scan with Trivy"'
+                    sh 'echo "Running SAST Security Scan with Trivy"'
+
+                    sh '''
+                        trivy fs \
+                        --scanners vuln,secret \
+                        .
+                    '''
                     }
                 } 
 
