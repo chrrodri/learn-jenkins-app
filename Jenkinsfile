@@ -41,6 +41,12 @@ pipeline {
                 } 
 
                  stage('Sast Fortify') {
+                    agent {
+                        docker {
+                            image 'fortifydocker/fortify-scancentral-client:latest'
+                            reuseNode true
+                        }
+                    }
                     steps {
                         sh 'echo "Running SAST Fortify Scan"'
                         sh 'chmod +x fortify.sh'
