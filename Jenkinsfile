@@ -33,21 +33,22 @@ pipeline {
                     }
                 }
 
-/*                 stage('Code Scan') {
+                stage('Code Scan') {
                     steps {
                         //sh 'sonar-scanner' 
                         sh 'echo "Running Code Scan with SonarQube"'
                     }
-                } */
+                } 
 
-/*                 stage('Sast Fortify') {
+                 stage('Sast Fortify') {
                     steps {
-                        //sh './fortify.sh'
                         sh 'echo "Running SAST Fortify Scan"'
+                        sh 'chmod +x fortify.sh'
+                        sh './fortify.sh'
                     }
-                } */
+                } 
 
-/*                 stage('Sast Security Scan') {
+/*              stage('Sast Security Scan') {
                     steps {
                         //sh 'trivy fs .'
                         sh 'echo "Running SAST Security Scan with Trivy"'
