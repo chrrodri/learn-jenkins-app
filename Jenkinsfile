@@ -132,17 +132,13 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
-                            node --version
-                            npm --version
-                            npm install
                             npm ci
-                            npm list @playwright/test
                             npx playwright test 
                         '''  
                     }
                     post {
                         always {
-                            junit 'test-results/*.xml'
+                            junit allowEmptyResults: true, testResults: 'test-results/*.xml'
 
                             archiveArtifacts(
                                 artifacts: '''
