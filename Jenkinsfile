@@ -90,7 +90,7 @@ pipeline {
                         }
                     }  
                 }
-              stage('Sast Security Scan') {
+                stage('Sast Security Scan') {
                     agent {
                         docker {
                             image 'aquasec/trivy:latest'
@@ -120,28 +120,33 @@ pipeline {
                     }
                 } 
 
-                 stage('Action Chain Tests') {
-                     agent {
+                stage('Action Chain Tests') {
+                    agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
                             reuseNode true
                         }
                     }  
-
                     steps {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
-                            npx serve -s build &
-                            SERVER_PID=$!
-
-                            sleep 10
-                            npx playwright install chromium --with-deps
-                            npx playwright test --reporter=html
-
-                            kill $SERVER_PID
+                            npx playwright test 
                         '''  
                     }
+                    post {
+                        always {
+                            junit 'test-results/*.xml'
+
+                            archiveArtifacts(
+                                artifacts: '''
+                                    playwright-report/**,
+                                    test-results/**
+                                ''',
+                                allowEmptyArchive: true
+                            )
+                        }
+                    }                   
                 } 
  
                 stage('Unit Tests') {
