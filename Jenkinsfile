@@ -25,6 +25,7 @@ pipeline {
                     agent {
                         docker {
                             image 'zricethezav/gitleaks:latest'
+                            args '--entrypoint=""'
                             reuseNode true
                         }
                     }
@@ -33,13 +34,13 @@ pipeline {
                         sh '''
                             gitleaks detect \
                                 --source . \
-                                --report-format sarif \
-                                --report-path gitleaks-report.sarif
+                                --report-format json \
+                                --report-path gitleaks-report.json
                         '''
                     }
                     post {
                         always {
-                            archiveArtifacts artifacts: 'gitleaks-report.sarif'
+                            archiveArtifacts artifacts: 'gitleaks-report.json'
                         }
                     } 
                 }
