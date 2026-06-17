@@ -69,6 +69,7 @@ pipeline {
                      agent {
                         docker {
                             image 'semgrep/semgrep'
+                            args '-v $WORKSPACE:/src'
                             reuseNode true
                         }
                     } 
