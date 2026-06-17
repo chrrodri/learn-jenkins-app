@@ -103,7 +103,10 @@ pipeline {
                     sh 'echo "Running SAST Security Scan with Trivy"'
 
                     sh '''
+                        mkdir -p /tmp/trivy-cache
+
                         trivy fs \
+                        --cache-dir /tmp/trivy-cache \
                         --scanners vuln,secret \
                         --format json \
                         --output trivy-report.json \
