@@ -1,27 +1,34 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-test('has title', async ({ page }) => {
-  await page.goto('/');
+test.describe('Learn Jenkins App', () => {
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Learn Jenkins/);
-});
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
 
-test('has Jenkins in the body', async ({ page }) => {
-  await page.goto('/');
+  test('should have the correct title', async ({ page }) => {
+    await expect(page).toHaveTitle(/Learn Jenkins/i);
+  });
 
-  const isVisible = await page.locator('a:has-text("Learn Jenkins on Udemy")').isVisible();
-  expect(isVisible).toBeTruthy();
-});
+  test('should display the Udemy link', async ({ page }) => {
+    const udemyLink = page.getByRole('link', {
+      name: /Learn Jenkins on Udemy/i
+    });
 
-test('has expected app version', async ({ page }) => {
-  await page.goto('/');
+    await expect(udemyLink).toBeVisible();
+  });
 
-  const expectedAppVersion = process.env.REACT_APP_VERSION ? process.env.REACT_APP_VERSION : '1';
+  test('should display the application version', async ({ page }) => {
+    const expectedAppVersion = process.env.REACT_APP_VERSION || '1';
 
-  console.log(expectedAppVersion);
+    console.log(`Expected version: ${expectedAppVersion}`);
 
-  const isVisible = await page.locator(`p:has-text("Application version: ${expectedAppVersion}")`).isVisible();
-  expect(isVisible).toBeTruthy();
+    const versionLabel = page.getByText(
+      `Application version: ${expectedAppVersion}`
+    );
+
+    await expect(versionLabel).toBeVisible();
+  });
+
 });
