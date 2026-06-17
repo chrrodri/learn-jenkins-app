@@ -32,7 +32,7 @@ pipeline {
                 stage('Code Scan') {
                     agent {
                         docker {
-                            image 'sonarqube'
+                            image 'sonarsource/sonar-scanner-cli:latest'
                             reuseNode true
                         }
                     } 
