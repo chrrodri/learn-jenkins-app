@@ -38,7 +38,11 @@ pipeline {
                     } 
                     steps {
                         sh 'echo "Running Code Scan with SonarQube"'
-                        sh 'sonar-scanner' 
+                        withSonarQubeEnv('SonarQube') {
+                            sh '''
+                                sonar-scanner -X
+                            '''
+                        }
                     }
                 } 
 
