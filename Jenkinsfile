@@ -44,10 +44,6 @@ pipeline {
 
                         sh '''
                         sonar-scanner \
-                        -Dsonar.projectKey=chrrodri_learn-jenkins-app \
-                        -Dsonar.organization=chrrodri \
-                        -Dsonar.sources=src \
-                        -Dsonar.host.url=https://sonarcloud.io \
                         -Dsonar.token=$SONAR_TOKEN
                         '''
                     }
