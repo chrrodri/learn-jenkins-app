@@ -124,7 +124,7 @@ pipeline {
                     agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
-                            rgs '--entrypoint=""'
+                            args '--entrypoint=""'
                             reuseNode true
                         }
                     }  
