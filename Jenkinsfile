@@ -22,11 +22,26 @@ pipeline {
 
             stages {
                 stage('Sast Secret Scan') {
-                    steps {
-                        //sh 'gitleaks detect --source .'
-                        sh 'echo "Running SAST Secret Scan with Gitleaks..."'
-        
+                    agent {
+                        docker {
+                            image 'zricethezav/gitleaks:latest'
+                            reuseNode true
+                        }
                     }
+                    steps {
+                        sh 'echo "Running SAST Secret Scan with Gitleaks..."'
+                        sh '''
+                            gitleaks detect \
+                                --source . \
+                                --report-format sarif \
+                                --report-path gitleaks-report.sarif
+                        '''
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'gitleaks-report.sarif'
+                        }
+                    } 
                 }
 
                 stage('Code Scan') {
