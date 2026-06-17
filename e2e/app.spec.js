@@ -22,13 +22,9 @@ test.describe('Learn Jenkins App', () => {
   test('should display the application version', async ({ page }) => {
     const expectedAppVersion = process.env.REACT_APP_VERSION || '1';
 
-    console.log(`Expected version: ${expectedAppVersion}`);
-
-    const versionLabel = page.getByText(
-      `Application version: ${expectedAppVersion}`
-    );
-
-    await expect(versionLabel).toBeVisible();
+    await expect(
+      page.getByTestId('app-version')
+    ).toContainText(expectedAppVersion);
   });
 
 });
