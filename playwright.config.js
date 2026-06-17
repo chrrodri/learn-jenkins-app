@@ -67,7 +67,7 @@ module.exports = defineConfig({
     command: 'npx serve -s build -l 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120000
+    timeout: 300000
    },
 });
 
