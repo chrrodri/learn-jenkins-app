@@ -30,16 +30,22 @@ pipeline {
                 }
 
                 stage('Code Scan') {
+                    agent {
+                        docker {
+                            image 'sonarsource/sonar-scanner-cli:12.1.0.3233_8.0.1'
+                            reuseNode true
+                        }
+                    }
                     steps {
-                        //sh 'sonar-scanner' 
                         sh 'echo "Running Code Scan with SonarQube"'
+                        sh 'sonar-scanner' 
                     }
                 } 
 
                  stage('Sast Fortify') {
                     agent {
                         docker {
-                            image 'fortifydocker/fortify-scancentral-client:latest'
+                            image 'fortifydocker/fortify-ci-tools:latest-jdk-8'
                             reuseNode true
                         }
                     }
