@@ -21,6 +21,49 @@ pipeline {
         stage('BUILD') {
 
             stages {
+                 stage('Sast Secret Scan') {
+                    agent {
+                        docker {
+                            image 'zricethezav/gitleaks:latest'
+                            args '--entrypoint=""'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh 'echo "Running SAST Secret Scan with Gitleaks..."'
+                        sh '''
+                            gitleaks detect \
+                                --source . \
+                                --report-format json \
+                                --report-path gitleaks-report.json
+                        '''
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'gitleaks-report.json'
+                        }
+                    } 
+                }
+
+                stage('Code Scan') {
+                    agent {
+                        docker {
+                            image 'sonarsource/sonar-scanner-cli:latest'
+                            reuseNode true
+                        }
+                    }
+                    environment {
+                        SONAR_TOKEN = credentials('sonarcloud-token')
+                    }
+                    steps {
+                        sh 'echo "Running Code Scan with SonarCloud"'
+
+                        sh '''
+                        sonar-scanner \
+                        -Dsonar.token=$SONAR_TOKEN
+                        '''
+                    }
+                } 
 
                  stage('Sast Fortify') {
                      agent {
@@ -106,9 +149,9 @@ pipeline {
                         sh 'echo "Running Unit Tests"'
                         npm test
                     }
-                } */
+                } 
 
-/*                 stage('Package') {
+                 stage('Package') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -129,9 +172,9 @@ pipeline {
                             archiveArtifacts artifacts: 'build.zip', fingerprint: true
                         }
                     }
-                } */
+                } 
 
-/*                 stage('Publish') {
+                 stage('Publish') {
 
                     steps {
                         sh '''
@@ -140,11 +183,11 @@ pipeline {
                         s3://chrrodri-build-artifacts/build.zip
                         '''
                     }
-                } */
+                } 
             }
         }
     
-/*         stage('DEPLOY') {
+         stage('DEPLOY') {
             stages {
                 stage('Deploy') {
                     steps {
@@ -155,7 +198,7 @@ pipeline {
             }
         } */
 
-/*         stage('TEST') {
+         stage('TEST') {
             stages {
                 stage('Integration Tests') {
                     steps {
@@ -182,6 +225,6 @@ pipeline {
                     }
                 }
             }
-        } */
+        } 
     }
 }
