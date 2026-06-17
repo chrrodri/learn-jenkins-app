@@ -164,7 +164,7 @@ pipeline {
 
                         sh '''
                             npm ci
-                            CI=true npm test:ci
+                            CI=true npm run test:ci
                         '''
                     }
                     post {
