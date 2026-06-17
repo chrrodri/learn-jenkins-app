@@ -124,6 +124,7 @@ pipeline {
                     agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
+                            rgs '--entrypoint=""'
                             reuseNode true
                         }
                     }  
@@ -131,6 +132,10 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
+                            node --version
+                            npm --version
+                            npm list @playwright/test
+                            npm ci
                             npx playwright test 
                         '''  
                     }
