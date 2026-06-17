@@ -99,7 +99,9 @@ pipeline {
                         }
                     }
                     steps {
-                    sh 'echo "Running SAST Security Scan with Trivy"'        
+                        
+                    sh 'echo "Running SAST Security Scan with Trivy"'
+
                     sh '''
                         trivy fs \
                         --scanners vuln,secret \
