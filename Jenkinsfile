@@ -103,8 +103,15 @@ pipeline {
                     sh '''
                         trivy fs \
                         --scanners vuln,secret \
+                        --format json \
+                        --output trivy-report.json \
                         .
                     '''
+                    }
+                    post {
+                        always {
+                            archiveArtifacts artifacts: 'trivy-report.json'
+                        }
                     }
                 } 
 
