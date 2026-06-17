@@ -32,13 +32,13 @@ pipeline {
                 stage('Code Scan') {
                     agent {
                         docker {
-                            image 'sonarsource/sonar-scanner-cli:12.1.0.3233_8.0.1'
+                            image 'sonarqube'
                             reuseNode true
                         }
-                    }
+                    } 
                     steps {
                         sh 'echo "Running Code Scan with SonarQube"'
-                        //sh 'sonar-scanner' 
+                        sh 'sonar-scanner' 
                     }
                 } 
 
