@@ -6,20 +6,20 @@ pipeline {
         timestamps()
         //ansiColor('xterm')
         skipStagesAfterUnstable()
-        //timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
     }
 
     environment {
-        GITLEAKS_IMAGE    = 'zricethezav/gitleaks:v8.28.0'
-        SONARCLOUD_IMAGE  = 'sonarsource/sonar-scanner-cli:11.5'
-        SEMGREP_IMAGE     = 'semgrep/semgrep:1.132.0'
-        TRIVY_IMAGE       = 'aquasec/trivy:0.67.2'
-        PLAYWRIGHT_IMAGE  = 'mcr.microsoft.com/playwright:v1.61.0-noble'
-        NODE_IMAGE        = 'node:22.19.0-alpine3.22'
-        AWS_IMAGE         = 'amazon/aws-cli:2.31.0'
+        GITLEAKS_IMAGE        = 'zricethezav/gitleaks:v8.28.0'
+        SONARCLOUD_IMAGE      = 'sonarsource/sonar-scanner-cli:11.5'
+        SEMGREP_IMAGE         = 'semgrep/semgrep:1.132.0'
+        TRIVY_IMAGE           = 'aquasec/trivy:0.67.2'
+        PLAYWRIGHT_IMAGE      = 'mcr.microsoft.com/playwright:v1.61.0-noble'
+        NODE_IMAGE            = 'node:22.19.0-alpine3.22'
+        AWS_IMAGE             = 'amazon/aws-cli:2.31.0'
 
-        APP_NAME    = 'learn-jenkins-app'
-        APP_VERSION = "1.0.${env.BUILD_NUMBER}"
+        APP_NAME              = 'learn-jenkins-app'
+        APP_VERSION           = "1.0.${env.BUILD_NUMBER}"
 
 
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
