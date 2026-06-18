@@ -195,14 +195,14 @@ pipeline {
                         sh '''
                             npm ci
                             npm run build
-                            zip -r build-${APP_VERSION}.zip build
+                            zip -r build-${APP_VERSION}.tar.gz build
                         '''
                         
                     }
                     post {
                         success {
                             archiveArtifacts(
-                                artifacts: 'build-${APP_VERSION}.zip',
+                                artifacts: '*.tar.gz',
                                 fingerprint: true
                             )
 
@@ -219,8 +219,8 @@ pipeline {
                     steps {
                         sh '''
                         aws --version
-                        aws s3 cp build.zip \
-                        s3://chrrodri-build-artifacts/build.zip
+                        aws s3 cp build.tar.gz \
+                        s3://chrrodri-build-artifacts/build.tar.gz
                         '''
                     }
                 } 
