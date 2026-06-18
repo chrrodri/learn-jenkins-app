@@ -10,10 +10,13 @@ pipeline {
     }
 
     environment {
-        NODE_IMAGE = 'node:22-alpine'
-        PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
-        AWS_IMAGE = 'amazon/aws-cli:latest'
-
+        GITLEAKS_IMAGE    = 'zricethezav/gitleaks:v8.28.0'
+        SONARCLOUD_IMAGE  = 'sonarsource/sonar-scanner-cli:11.5'
+        SEMGREP_IMAGE     = 'semgrep/semgrep:1.132.0'
+        TRIVY_IMAGE       = 'aquasec/trivy:0.67.2'
+        PLAYWRIGHT_IMAGE  = 'mcr.microsoft.com/playwright:v1.61.0-noble'
+        NODE_IMAGE        = 'node:22.19.0-alpine3.22'
+        AWS_IMAGE         = 'amazon/aws-cli:2.31.0'
 
         APP_NAME    = 'learn-jenkins-app'
         APP_VERSION = "1.0.${env.BUILD_NUMBER}"
@@ -48,7 +51,7 @@ pipeline {
                  stage('Sast Secret Scan') {
                     agent {
                         docker {
-                            image 'zricethezav/gitleaks:latest'
+                            image "${GITLEAKS_IMAGE}"
                             args '--entrypoint=""'
                             reuseNode true
                         }
@@ -72,7 +75,7 @@ pipeline {
                 stage('Code Scan') {
                     agent {
                         docker {
-                            image 'sonarsource/sonar-scanner-cli:latest'
+                            image "${SONARCLOUD_IMAGE}"
                             reuseNode true
                         }
                     }
@@ -92,7 +95,7 @@ pipeline {
                  stage('Sast Fortify') {
                      agent {
                         docker {
-                            image 'semgrep/semgrep'
+                            image "${SEMGREP_IMAGE}"
                             args '-v $WORKSPACE:/src'
                             reuseNode true
                         }
@@ -117,7 +120,7 @@ pipeline {
                 stage('Sast Security Scan') {
                     agent {
                         docker {
-                            image 'aquasec/trivy:latest'
+                            image "${TRIVY_IMAGE}"
                             args '--entrypoint="" --user root'
                             reuseNode true
                         }
