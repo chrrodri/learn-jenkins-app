@@ -195,7 +195,7 @@ pipeline {
                         sh '''
                             npm ci
                             npm run build
-                            zip -r build-${APP_VERSION}.tar.gz build
+                            tar -czf build-${APP_VERSION}.tar.gz build
                         '''
                         
                     }
