@@ -14,6 +14,9 @@ pipeline {
         PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
         AWS_IMAGE = 'amazon/aws-cli:2.7.19'
         APP_VERSION = "1.0.${env.BUILD_NUMBER}"
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_DEFAULT_REGION    = 'us-east-1'
     }
 
     stages {
@@ -215,13 +218,26 @@ pipeline {
                 } 
 
                  stage('Publish') {
-
+                    agent {
+                        docker {
+                            image 'amazon/aws-cli:2'
+                            reuseNode true
+                        }
+                    }
                     steps {
-                        sh '''
-                        aws --version
-                        aws s3 cp build-${APP_VERSION}.tar.gz \
-                        s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
-                        '''
+                        withCredentials([
+                            string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                        ]) {
+
+                            sh '''
+                            export AWS_DEFAULT_REGION=us-east-1
+
+                            aws s3 cp \
+                            build-${APP_VERSION}.tar.gz \
+                            s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
+                            '''
+                        }
                     }
                 } 
             }
