@@ -44,8 +44,8 @@ pipeline {
                         sh '''
                             npm install
                             npm ci
-                            stash name: 'workspace', includes: '**'
                         '''
+                        stash includes: 'node_modules/**', name: 'node_modules'
                     }
                 }
                  stage('Sast Secret Scan') {
@@ -57,7 +57,6 @@ pipeline {
                         }
                     }
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running SAST Secret Scan with Gitleaks..."'
                         sh '''
                             gitleaks detect \
@@ -84,7 +83,6 @@ pipeline {
                         SONAR_TOKEN = credentials('sonarcloud-token')
                     }
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running Code Scan with SonarCloud"'
 
                         sh '''
@@ -103,7 +101,6 @@ pipeline {
                         }
                     } 
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running SAST Scan with Semgrep"'
 
                         sh '''
@@ -129,7 +126,6 @@ pipeline {
                         }
                     }
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running SAST Security Scan with Trivy"'
 
                         sh '''
@@ -159,7 +155,6 @@ pipeline {
                         }
                     }  
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
@@ -189,7 +184,6 @@ pipeline {
                         }
                     }
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running Unit Tests"'
 
                         sh '''
@@ -220,7 +214,6 @@ pipeline {
                         }
                     }
                     steps {
-                        unstash 'workspace'
                         sh 'echo "Running Package Stage"'
                         sh '''
                             npm run build
@@ -252,7 +245,6 @@ pipeline {
                         }
                     }
                     steps {
-                        unstash 'workspace'
                         withCredentials([
                             string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                             string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
