@@ -12,7 +12,7 @@ pipeline {
     environment {
         NODE_IMAGE = 'node:22-alpine'
         PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
-        AWS_IMAGE = 'amazon/aws-cli:2.7.19'
+        AWS_IMAGE = 'amazon/aws-cli:latest'
 
 
         APP_NAME    = 'learn-jenkins-app'
@@ -237,7 +237,7 @@ pipeline {
                  stage('Publish') {
                     agent {
                         docker {
-                            image 'amazon/aws-cli:2'
+                            image "${AWS_IMAGE}"
                             reuseNode true
                         }
                     }
