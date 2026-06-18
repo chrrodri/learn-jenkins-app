@@ -219,8 +219,8 @@ pipeline {
                     steps {
                         sh '''
                         aws --version
-                        aws s3 cp build.tar.gz \
-                        s3://chrrodri-build-artifacts/build.tar.gz
+                        aws s3 cp build-${APP_VERSION}.tar.gz \
+                        s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
                         '''
                     }
                 } 
