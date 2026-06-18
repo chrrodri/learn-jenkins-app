@@ -13,7 +13,12 @@ pipeline {
         NODE_IMAGE = 'node:22-alpine'
         PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.61.0-noble'
         AWS_IMAGE = 'amazon/aws-cli:2.7.19'
+
+
+        APP_NAME    = 'learn-jenkins-app'
         APP_VERSION = "1.0.${env.BUILD_NUMBER}"
+
+
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
@@ -295,4 +300,9 @@ pipeline {
             }
         } 
     }
+    post { 
+        always { 
+            cleanWs() 
+        } 
+    }    
 }
