@@ -24,6 +24,19 @@ pipeline {
         stage('BUILD') {
 
             stages {
+                stage('Install Dependencies') {
+                    agent {
+                        docker {
+                            image "${NODE_IMAGE}"
+                            reuseNode true
+                        }
+                    }
+
+                    steps {
+                        sh 'npm ci'
+                        stash includes: 'node_modules/**', name: 'node_modules'
+                    }
+                }
                  stage('Sast Secret Scan') {
                     agent {
                         docker {
@@ -135,8 +148,6 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
-                            npm install
-                            npm ci
                             npx playwright test 
                         '''  
                     }
@@ -166,7 +177,6 @@ pipeline {
                         sh 'echo "Running Unit Tests"'
 
                         sh '''
-                            npm ci
                             CI=true npm run test:ci
                         '''
                     }
@@ -196,7 +206,6 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
-                            npm ci
                             npm run build
                             tar -czf build-${APP_VERSION}.tar.gz build
                         '''
