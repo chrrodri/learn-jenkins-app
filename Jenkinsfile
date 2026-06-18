@@ -241,6 +241,7 @@ pipeline {
                     agent {
                         docker {
                             image "${AWS_IMAGE}"
+                            args '--entrypoint=""'
                             reuseNode true
                         }
                     }
