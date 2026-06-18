@@ -33,7 +33,10 @@ pipeline {
                     }
 
                     steps {
-                        sh 'npm ci'
+                        sh '''
+                            npm install
+                            npm ci
+                        '''
                         stash includes: 'node_modules/**', name: 'node_modules'
                     }
                 }
