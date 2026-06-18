@@ -44,8 +44,8 @@ pipeline {
                         sh '''
                             npm install
                             npm ci
+                            stash name: 'workspace', includes: '**'
                         '''
-                        stash includes: 'node_modules/**', name: 'node_modules'
                     }
                 }
                  stage('Sast Secret Scan') {
