@@ -158,6 +158,9 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
+                            npx serve -s build -l 3000 &
+                            sleep 10
+                            curl http://localhost:3000
                             npx playwright test 
                         '''  
                     }
@@ -251,11 +254,11 @@ pipeline {
                         ]) {
 
                             sh '''
-                            export AWS_DEFAULT_REGION=us-east-1
+                                export AWS_DEFAULT_REGION=us-east-1
 
-                            aws s3 cp \
-                            build-${APP_VERSION}.tar.gz \
-                            s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
+                                aws s3 cp \
+                                build-${APP_VERSION}.tar.gz \
+                                s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
                             '''
                         }
                     }
