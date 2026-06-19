@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learn-jenkins-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: learn-jenkins-app
+
+  template:
+    metadata:
+      labels:
+        app: learn-jenkins-app
+
+    spec:
+      containers:
+      - name: learn-jenkins-app
+        image: chrrodri/learn-jenkins-app:latest
+
+        ports:
+        - containerPort: 80

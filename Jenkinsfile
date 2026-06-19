@@ -17,6 +17,8 @@ pipeline {
         PLAYWRIGHT_IMAGE      = 'mcr.microsoft.com/playwright:v1.61.0-noble'
         NODE_IMAGE            = 'node:22.19.0-alpine3.22'
         AWS_IMAGE             = 'amazon/aws-cli:2.31.0'
+        K8S_IMAGE             = 'bitnami/kubectl:1.34.1'
+
 
         APP_NAME              = 'learn-jenkins-app'
         APP_VERSION           = "1.0.${env.BUILD_NUMBER}"
@@ -268,6 +270,17 @@ pipeline {
          stage('DEPLOY') {
             stages {
                 stage('Deploy') {
+                    when {
+                        branch 'main'
+                    }
+
+                    agent {
+                        docker {
+                            image "${K8S_IMAGE}"
+                            args '--entrypoint=""'
+                            reuseNode true
+                        }
+                    }
                     steps {
                         //sh 'kubectl apply -f deployment.yaml'
                         sh 'echo "Running Deploy Stage"'
