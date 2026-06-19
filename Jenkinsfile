@@ -160,7 +160,7 @@ pipeline {
                         
                         sh '''
                             npx serve -s build -l 3000 &
-                            sleep 10
+                            sleep 20
                             curl http://localhost:3000
                             npx playwright test 
                         '''  
