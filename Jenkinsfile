@@ -40,7 +40,6 @@ pipeline {
                             reuseNode true
                         }
                     }
-
                     steps {
                         sh '''
                             npm install
@@ -49,6 +48,7 @@ pipeline {
                         stash includes: 'node_modules/**', name: 'node_modules'
                     }
                 }
+
                  stage('Sast Secret Scan') {
                     agent {
                         docker {
@@ -91,7 +91,7 @@ pipeline {
                 } 
 
                  stage('Sast Fortify') {
-                     agent {
+                    agent {
                         docker {
                             image "${SEMGREP_IMAGE}"
                             args '-v $WORKSPACE:/src'
@@ -115,6 +115,7 @@ pipeline {
                         }
                     }  
                 }
+
                 stage('Sast Security Scan') {
                     agent {
                         docker {
@@ -295,7 +296,7 @@ pipeline {
                         sh 'echo "Running Custom Security Check"'
                     }
                 }
-                 stage('Gat Itaas') {
+                stage('Gat Itaas') {
                     steps {
                         //sh './integration-tests.sh'
                         sh 'echo "Running Gat Itaas"'
