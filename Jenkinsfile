@@ -21,6 +21,7 @@ pipeline {
         APP_NAME              = 'learn-jenkins-app'
         APP_VERSION           = "1.0.${env.BUILD_NUMBER}"
 
+        SONAR_TOKEN           = credentials('sonarcloud-token')
 
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
@@ -78,9 +79,6 @@ pipeline {
                             image "${SONARCLOUD_IMAGE}"
                             reuseNode true
                         }
-                    }
-                    environment {
-                        SONAR_TOKEN = credentials('sonarcloud-token')
                     }
                     steps {
                         sh 'echo "Running Code Scan with SonarCloud"'
