@@ -221,8 +221,8 @@ pipeline {
                         sh 'echo "Running Package Stage"'
                         sh '''
                             npm run build
-                            tar -czf build-${APP_VERSION}.tar.gz build
-                        '''
+                            
+                        ''' //tar -czf build-${APP_VERSION}.tar.gz build
                         
                     }
                     post {
@@ -253,14 +253,21 @@ pipeline {
                             string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                             string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                         ]) {
-                            sh 'echo "Publish to ECR"' 
+                            sh 'echo "Publish to Cloudfront"' 
                             sh '''
                                 export AWS_DEFAULT_REGION=us-east-1
 
-                                aws s3 cp \
-                                build-${APP_VERSION}.tar.gz \
-                                s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz
+                                aws s3 sync build/ \
+                                s3://chrrodri-$APP_NAME \
+                                --delete
+
+                                aws cloudfront create-invalidation \
+                                    --distribution-id EH4EFWCPXWNTT \
+                                    --paths "/*"
                             '''
+                                /* aws s3 cp \
+                                build-${APP_VERSION}.tar.gz \
+                                s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz */
                         }
                     }
                 } 
