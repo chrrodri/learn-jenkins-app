@@ -273,7 +273,6 @@ pipeline {
                     when {
                         branch 'main'
                     }
-
                     agent {
                         docker {
                             image "${K8S_IMAGE}"
