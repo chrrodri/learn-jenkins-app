@@ -6,7 +6,7 @@ pipeline {
         timestamps()
         //ansiColor('xterm')
         skipStagesAfterUnstable()
-        timeout(time: 60, unit: 'MINUTES')
+        //timeout(time: 60, unit: 'MINUTES')
     }
 
     environment {
