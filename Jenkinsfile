@@ -299,8 +299,8 @@ pipeline {
                         }
                     }
                     steps {
-                        //sh 'kubectl apply -f deployment.yaml'
                         sh 'echo "Running Deploy Stage"'
+                        //sh 'kubectl apply -f deployment.yaml'
                     }
                 }
             }
