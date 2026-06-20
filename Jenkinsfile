@@ -17,7 +17,7 @@ pipeline {
         PLAYWRIGHT_IMAGE      = 'mcr.microsoft.com/playwright:v1.61.0-noble'
         NODE_IMAGE            = 'node:22.19.0-alpine3.22'
         AWS_IMAGE             = 'amazon/aws-cli:2.31.0'
-        K8S_IMAGE             = 'bitnami/kubectl:1.34.1'
+        K8S_IMAGE             = 'bitnami/kubectl:latest'
 
 
         APP_NAME              = 'learn-jenkins-app'
