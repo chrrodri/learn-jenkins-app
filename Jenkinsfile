@@ -159,10 +159,19 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
+                            npm run build
+
                             npx serve -s build -l 3000 &
+                            SERVER_PID=$!
+
                             sleep 20
+
                             curl http://localhost:3000
+
                             npx playwright test 
+
+                            kill $SERVER_PID
+
                         '''  
                     }
                     post {
