@@ -230,6 +230,8 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
+                            export REACT_APP_VERSION=${APP_VERSION}
+
                             npm run build
                             
                         ''' //tar -czf build-${APP_VERSION}.tar.gz build
