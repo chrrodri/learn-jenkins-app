@@ -266,6 +266,8 @@ pipeline {
                             sh '''
                                 export AWS_DEFAULT_REGION=us-east-1
 
+                                aws sts get-caller-identity
+
                                 aws s3 sync build/ \
                                 s3://chrrodri-$APP_NAME \
                                 --delete
