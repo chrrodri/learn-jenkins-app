@@ -262,7 +262,7 @@ pipeline {
                                 --delete
 
                                 aws cloudfront create-invalidation \
-                                    --distribution-id EH4EFWCPXWNTT \
+                                    --distribution-id E3VAAHC6T9JCYB \
                                     --paths "/*"
                             '''
                                 /* aws s3 cp \
