@@ -230,9 +230,13 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
+                            echo "APP_VERSION=${APP_VERSION}"
                             export REACT_APP_VERSION=${APP_VERSION}
+                            echo "REACT_APP_VERSION=${REACT_APP_VERSION}"
 
                             npm run build
+
+                            grep -R "${APP_VERSION}" build
                             
                         ''' //tar -czf build-${APP_VERSION}.tar.gz build
                         

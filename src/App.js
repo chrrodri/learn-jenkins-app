@@ -15,7 +15,7 @@ function App() {
           Learn Jenkins on Udemy
         </a>
       </header>
-      <p data-testid="app-version">
+      <p>
           Application version: {process.env.REACT_APP_VERSION}
       </p>
     </div>
