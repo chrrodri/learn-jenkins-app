@@ -28,6 +28,7 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
+        AWS_DIST_ID           = 'E3VAAHC6T9JCYB'
     }
 
     stages {
@@ -273,7 +274,7 @@ pipeline {
                                 --delete
 
                                 aws cloudfront create-invalidation \
-                                    --distribution-id E3VAAHC6T9JCYB \
+                                    --distribution-id $AWS_DIST_ID \
                                     --paths "/*"
                             '''
                                 /* aws s3 cp \
