@@ -236,10 +236,10 @@ pipeline {
                     }
                     post {
                         success {
-                            archiveArtifacts(
+                             /*archiveArtifacts(
                                 artifacts: '*.tar.gz',
                                 fingerprint: true
-                            )
+                            ) */
 
                             archiveArtifacts(
                                 artifacts: 'build/**',
