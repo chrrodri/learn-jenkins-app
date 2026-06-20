@@ -16,7 +16,7 @@ function App() {
         </a>
       </header>
       <p data-testid="app-version">
-          Application version: {import.meta.env.REACT_APP_VERSION}
+          Application version: {process.env.REACT_APP_VERSION}
       </p>
     </div>
   );
