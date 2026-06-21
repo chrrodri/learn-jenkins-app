@@ -28,7 +28,8 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
-        AWS_DIST_ID           = 'E3BBTS764JY40I'
+        AWS_DIST_ID           = 'E3OO82ZTDER08Y'
+        AWS_CLOUDFRONT_URL     = 'd1zuxiba2c1vpf.cloudfront.net'
     }
 
     stages {
@@ -230,14 +231,8 @@ pipeline {
                     steps {
                         sh 'echo "Running Package Stage"'
                         sh '''
-                            echo "APP_VERSION=${APP_VERSION}"
                             export REACT_APP_VERSION=${APP_VERSION}
-                            echo "REACT_APP_VERSION=${REACT_APP_VERSION}"
-
-                            npm run build
-
-                            grep -R "${APP_VERSION}" build
-                            
+                            npm run build                            
                         ''' //tar -czf build-${APP_VERSION}.tar.gz build
                         
                     }
@@ -273,8 +268,6 @@ pipeline {
                             sh '''
                                 export AWS_DEFAULT_REGION=us-east-1
 
-                                aws sts get-caller-identity
-
                                 aws s3 sync build/ \
                                 s3://chrrodri-$APP_NAME \
                                 --delete
@@ -282,6 +275,8 @@ pipeline {
                                 aws cloudfront create-invalidation \
                                     --distribution-id $AWS_DIST_ID \
                                     --paths "/*"
+
+                                echo "Cloudfront URL: https://$AWS_CLOUDFRONT_URL"
                             '''
                                 /* aws s3 cp \
                                 build-${APP_VERSION}.tar.gz \
