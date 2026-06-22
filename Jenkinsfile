@@ -340,7 +340,7 @@ pipeline {
             pipeline_duration_seconds ${duration}
             """
                         )
-                    }
+                    
 
                     sh '''
                         apt-get update
