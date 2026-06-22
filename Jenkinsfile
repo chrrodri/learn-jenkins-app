@@ -72,18 +72,26 @@ pipeline {
                                 --report-format json \
                                 --report-path gitleaks-report.json
                         '''
-                        sh '''
-                            TOTAL=$(jq 'length' gitleaks-report.json)
-
-                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
-
-                            curl --data-binary @gitleaks.prom \
-                            http://192.168.1.194:9091/metrics/job/gitleaks
-                        '''
                     }
                     post {
                         always {
                             archiveArtifacts artifacts: 'gitleaks-report.json'
+                        }
+                        script {
+
+                            def report = readJSON file: 'gitleaks-report.json'
+
+                            def totalFindings = report.size()
+
+                            writeFile(
+                                file: 'gitleaks.prom',
+                                text: "gitleaks_findings_total ${totalFindings}\n"
+                            )
+
+                            sh '''
+                            curl --data-binary @gitleaks.prom \
+                            http://192.168.1.194:9091/metrics/job/gitleaks
+                            '''
                         }
                     } 
                 }
@@ -404,7 +412,6 @@ pipeline {
     }
     post { 
         always { 
-            cleanWs()
             script {
                 def duration = System.currentTimeMillis() - BUILD_START.toLong()
 
@@ -415,6 +422,7 @@ pipeline {
                 http://192.168.1.194:9091/metrics/job/pipeline
                 """
             }
+            cleanWs()
         } 
     }    
 }
