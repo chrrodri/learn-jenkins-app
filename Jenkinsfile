@@ -323,9 +323,6 @@ pipeline {
                 """
                             )
                                 sh '''
-                                    apt-get update
-                                    apt-get install -y curl
-
                                     curl --data-binary @metrics.prom \
                                     http://192.168.1.194:9091/metrics/job/jenkins-security
                                 '''
@@ -335,7 +332,7 @@ pipeline {
                 }
             }
         }
-        
+
          stage('DEPLOY') {
             stages {
                 stage('Deploy to CloudFront') {
