@@ -306,9 +306,9 @@ pipeline {
                             //
                             // Coverage
                             //
-                            def coverage = readJSON file: 'coverage/coverage-summary.json'
-                            def coveragePercent = coverage.total.lines.pct
-
+                            //def coverage = readJSON file: 'coverage/coverage-summary.json'
+                            //def coveragePercent = coverage.total.lines.pct
+                //coverage_percent ${coveragePercent}
                             //
                             // Crear archivo Prometheus
                             //
@@ -319,7 +319,7 @@ pipeline {
                 semgrep_findings_total ${semgrepFindings}
                 trivy_critical ${critical}
                 trivy_high ${high}
-                coverage_percent ${coveragePercent}
+
                 """
                             )
                                 sh '''
@@ -327,7 +327,7 @@ pipeline {
                                     apt-get install -y curl
 
                                     curl --data-binary @metrics.prom \
-                                    http://192.168.1.194:9091/metrics/job/jenkins-security
+                                    http://192.168.1.28:9091/metrics/job/jenkins-security
                                 '''
                             }
                         }
