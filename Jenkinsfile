@@ -15,7 +15,8 @@ pipeline {
         SEMGREP_IMAGE         = 'semgrep/semgrep:1.132.0'
         TRIVY_IMAGE           = 'aquasec/trivy:0.67.2'
         PLAYWRIGHT_IMAGE      = 'mcr.microsoft.com/playwright:v1.61.0-noble'
-        NODE_IMAGE            = 'node:22.19.0-alpine3.22'
+        //NODE_IMAGE            = 'node:22.19.0-alpine3.22'
+        NODE_IMAGE            = 'node-deps:latest'
         AWS_IMAGE             = 'amazon/aws-cli:2.31.0'
         K8S_IMAGE             = 'bitnami/kubectl:latest'
 
