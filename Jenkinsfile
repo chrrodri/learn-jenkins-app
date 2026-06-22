@@ -41,7 +41,7 @@ pipeline {
         stage('BUILD') {
 
             stages {
-/*                   stage('Install Dependencies') {
+                stage('Install Dependencies') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -55,7 +55,7 @@ pipeline {
                             npm ci --prefer-offline --no-audit
                         '''
                     }
-                }   */
+                }   
 
                  stage('Sast Secret Scan') {
                     agent {
