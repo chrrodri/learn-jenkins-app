@@ -80,37 +80,6 @@ pipeline {
                         }
                     } 
                 }
-                 stage('Publish') {
-                    agent {
-                        docker {
-                            image "${NODE_IMAGE}"
-                            args '--entrypoint=""'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh 'echo "Publishing Gitleaks Metrics to Prometheus"'
-                        sh '''
-                            TOTAL=$(node -pe "require('./gitleaks-report.json').length")
-
-                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
-
-                            node -e "
-                            const fs = require('fs');
-
-                            fetch('http://192.168.1.194:9091/metrics/job/gitleaks', {
-                                method: 'POST',
-                                body: fs.readFileSync('gitleaks.prom')
-                            })
-                            .then(() => console.log('Metric pushed'))
-                            .catch(err => {
-                                console.error(err);
-                                process.exit(1);
-                            });
-                            "
-                        '''
-                    }
-                } 
 
                 stage('Code Scan') {
                     agent {
@@ -286,7 +255,7 @@ pipeline {
                     }
                 } 
 
-/*                  stage('Publish') {
+                stage('Publish') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -295,31 +264,78 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'echo "Publishing Gitleaks Metrics to Prometheus"'
-                        sh '''
-                            TOTAL=$(node -pe "require('./gitleaks-report.json').length")
+                        script {
 
-                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
+                            //
+                            // Gitleaks
+                            //
+                            def gitleaksReport = readJSON file: 'gitleaks-report.json'
+                            def gitleaksFindings = gitleaksReport.size()
 
-                            node -e "
-                            const fs = require('fs');
+                            //
+                            // Semgrep
+                            //
+                            def semgrepReport = readJSON file: 'semgrep-report.json'
+                            def semgrepFindings = semgrepReport.results.size()
 
-                            fetch('http://192.168.1.194:9091/metrics/job/gitleaks', {
-                                method: 'POST',
-                                body: fs.readFileSync('gitleaks.prom')
-                            })
-                            .then(() => console.log('Metric pushed'))
-                            .catch(err => {
-                                console.error(err);
-                                process.exit(1);
-                            });
-                            "
-                        '''
+                            //
+                            // Trivy
+                            //
+                            def trivyReport = readJSON file: 'trivy-report.json'
+
+                            int critical = 0
+                            int high = 0
+
+                            trivyReport.Results.each { result ->
+
+                                if (result.Vulnerabilities) {
+
+                                    result.Vulnerabilities.each { vuln ->
+
+                                        if (vuln.Severity == "CRITICAL") {
+                                            critical++
+                                        }
+
+                                        if (vuln.Severity == "HIGH") {
+                                                    high++
+                                        }
+                                    }
+                                }
+                            
+
+                            //
+                            // Coverage
+                            //
+                            def coverage = readJSON file: 'coverage/coverage-summary.json'
+                            def coveragePercent = coverage.total.lines.pct
+
+                            //
+                            // Crear archivo Prometheus
+                            //
+                            writeFile(
+                                file: 'metrics.prom',
+                                text: """
+                gitleaks_findings_total ${gitleaksFindings}
+                semgrep_findings_total ${semgrepFindings}
+                trivy_critical ${critical}
+                trivy_high ${high}
+                coverage_percent ${coveragePercent}
+                """
+                            )
+                                sh '''
+                                    apt-get update
+                                    apt-get install -y curl
+
+                                    curl --data-binary @metrics.prom \
+                                    http://192.168.1.194:9091/metrics/job/jenkins-security
+                                '''
+                            }
+                        }
                     }
-                }  */
+                }
             }
         }
-    
+        
          stage('DEPLOY') {
             stages {
                 stage('Deploy to CloudFront') {
