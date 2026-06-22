@@ -76,22 +76,23 @@ pipeline {
                     post {
                         always {
                             archiveArtifacts artifacts: 'gitleaks-report.json'
-                        }
-                        script {
+                        
+                            script {
 
-                            def report = readJSON file: 'gitleaks-report.json'
+                                def report = readJSON file: 'gitleaks-report.json'
 
-                            def totalFindings = report.size()
+                                def totalFindings = report.size()
 
-                            writeFile(
-                                file: 'gitleaks.prom',
-                                text: "gitleaks_findings_total ${totalFindings}\n"
-                            )
+                                writeFile(
+                                    file: 'gitleaks.prom',
+                                    text: "gitleaks_findings_total ${totalFindings}\n"
+                                )
 
-                            sh '''
-                            curl --data-binary @gitleaks.prom \
-                            http://192.168.1.194:9091/metrics/job/gitleaks
-                            '''
+                                sh '''
+                                curl --data-binary @gitleaks.prom \
+                                http://192.168.1.194:9091/metrics/job/gitleaks
+                                '''
+                            }
                         }
                     } 
                 }
