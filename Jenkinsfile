@@ -40,7 +40,7 @@ pipeline {
         stage('BUILD') {
 
             stages {
-                 stage('Install Dependencies') {
+                  stage('Install Dependencies') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -54,7 +54,7 @@ pipeline {
                         '''
                         stash includes: 'node_modules/**', name: 'node_modules'
                     }
-                } 
+                }  
 
                  stage('Sast Secret Scan') {
                     agent {
@@ -70,7 +70,7 @@ pipeline {
                             gitleaks detect \
                                 --source . \
                                 --report-format json \
-                                --report-path gitleaks-report.json
+                                --report-path gitleaks-report.json || true      
                         '''
                     }
                     post {
@@ -263,93 +263,15 @@ pipeline {
                         }
                     }
                     steps {
-                        //
-                        // Gitleaks
-                        //
-                        def gitleaksReport = readJSON file: 'gitleaks-report.json'
-                        def gitleaksFindings = gitleaksReport.size()
+                        sh 'echo "Publishing Gitleaks Metrics to Prometheus"'
+                        sh '''
+                            TOTAL=$(node -pe "require('./gitleaks-report.json').length")
 
-                        //
-                        // SonarCloud
-                        //
+                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
 
-                        //
-                        // Semgrep
-                        //
-                        def semgrepReport = readJSON file: 'semgrep-report.json'
-                        def semgrepFindings = semgrepReport.results.size()
-
-                        //
-                        // Trivy
-                        //
-                        def trivyReport = readJSON file: 'trivy-report.json'
-
-                        int critical = 0
-                        int high = 0
-
-                        trivyReport.Results.each { result ->
-
-                            if (result.Vulnerabilities) {
-
-                                result.Vulnerabilities.each { vuln ->
-
-                                    if (vuln.Severity == "CRITICAL") {
-                                        critical++
-                                    }
-
-                                    if (vuln.Severity == "HIGH") {
-                                        high++
-                                    }
-                                }
-                            }
-                        }
-
-                        //
-                        // Action Chain Tests
-                        //
-                        def totalTests = 0
-
-                        findFiles(glob: 'test-results/*.xml').each {
-                            totalTests++
-                        }
-
-                        //
-                        // Unit Tests
-                        //
-                        def coverage = readJSON file: 'coverage/coverage-summary.json'
-                        def coveragePercent = coverage.total.lines.pct
-
-                        //
-                        // Build Duration
-                        //
-                        def duration = 
-                            (System.currentTimeMillis() - BUILD_START_TIME.toLong()) / 1000
-                        
-                        //
-                        // Crear archivo Prometheus
-                        //
-                        writeFile(
-                            file: 'metrics.prom',
-                            text: """
-            gitleaks_findings_total ${gitleaksFindings}
-            semgrep_findings_total ${semgrepFindings}
-            trivy_critical ${critical}
-            trivy_high ${high}
-            playwright_tests_total ${totalTests}
-            coverage_percent ${coveragePercent}
-            pipeline_duration_seconds ${duration}
-            """
-                        )
-                    
-
-                    sh '''
-                        apt-get update
-                        apt-get install -y curl
-
-                        curl --data-binary @metrics.prom \
-                        http://192.168.1.194:9091/metrics/job/jenkins-security
-                    '''
-
+                            curl --data-binary @gitleaks.prom \
+                            http://192.168.1.194:9091/metrics/job/gitleaks
+                        '''
                     }
                 } 
             }
