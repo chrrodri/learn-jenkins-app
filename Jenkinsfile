@@ -40,7 +40,7 @@ pipeline {
         stage('BUILD') {
 
             stages {
-                stage('Install Dependencies') {
+/*                 stage('Install Dependencies') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -54,7 +54,7 @@ pipeline {
                         '''
                         stash includes: 'node_modules/**', name: 'node_modules'
                     }
-                }
+                } */
 
                  stage('Sast Secret Scan') {
                     agent {
