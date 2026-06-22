@@ -323,8 +323,7 @@ pipeline {
                 """
                             )
                                 sh '''
-                                    apt-get update
-                                    apt-get install -y curl
+                                    apk add --no-cache curl
 
                                     curl --data-binary @metrics.prom \
                                     http://192.168.1.28:9091/metrics/job/jenkins-security
