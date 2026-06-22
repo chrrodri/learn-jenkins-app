@@ -44,15 +44,15 @@ pipeline {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
+                            args '-v npm-cache:/root/.npm'
                             reuseNode true
                         }
                     }
                     steps {
                         sh '''
                             npm install
-                            npm ci
+                            npm ci --prefer-offline --no-audit
                         '''
-                        stash includes: 'node_modules/**', name: 'node_modules'
                     }
                 }  
 
