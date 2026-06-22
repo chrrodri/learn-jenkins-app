@@ -79,6 +79,37 @@ pipeline {
                         }
                     } 
                 }
+                 stage('Publish') {
+                    agent {
+                        docker {
+                            image "${NODE_IMAGE}"
+                            args '--entrypoint=""'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh 'echo "Publishing Gitleaks Metrics to Prometheus"'
+                        sh '''
+                            TOTAL=$(node -pe "require('./gitleaks-report.json').length")
+
+                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
+
+                            node -e "
+                            const fs = require('fs');
+
+                            fetch('http://192.168.1.194:9091/metrics/job/gitleaks', {
+                                method: 'POST',
+                                body: fs.readFileSync('gitleaks.prom')
+                            })
+                            .then(() => console.log('Metric pushed'))
+                            .catch(err => {
+                                console.error(err);
+                                process.exit(1);
+                            });
+                            "
+                        '''
+                    }
+                } 
 
                 stage('Code Scan') {
                     agent {
@@ -254,7 +285,7 @@ pipeline {
                     }
                 } 
 
-                 stage('Publish') {
+/*                  stage('Publish') {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
@@ -269,11 +300,22 @@ pipeline {
 
                             echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
 
-                            curl --data-binary @gitleaks.prom \
-                            http://192.168.1.194:9091/metrics/job/gitleaks
+                            node -e "
+                            const fs = require('fs');
+
+                            fetch('http://192.168.1.194:9091/metrics/job/gitleaks', {
+                                method: 'POST',
+                                body: fs.readFileSync('gitleaks.prom')
+                            })
+                            .then(() => console.log('Metric pushed'))
+                            .catch(err => {
+                                console.error(err);
+                                process.exit(1);
+                            });
+                            "
                         '''
                     }
-                } 
+                }  */
             }
         }
     
