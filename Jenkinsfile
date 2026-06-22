@@ -28,8 +28,11 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
-        AWS_DIST_ID           = 'E3OO82ZTDER08Y'
-        AWS_CLOUDFRONT_URL     = 'd1zuxiba2c1vpf.cloudfront.net'
+        AWS_DIST_ID           = 'E1R109GF2KN71U'
+        AWS_CLOUDFRONT_URL     = 'd1bctqdoo5thax.cloudfront.net'
+
+        BUILD_START = "${System.currentTimeMillis()}"
+
     }
 
     stages {
@@ -69,6 +72,14 @@ pipeline {
                                 --report-format json \
                                 --report-path gitleaks-report.json
                         '''
+                        sh '''
+                            TOTAL=$(jq 'length' gitleaks-report.json)
+
+                            echo "gitleaks_findings_total $TOTAL" > gitleaks.prom
+
+                            curl --data-binary @gitleaks.prom \
+                            http://192.168.1.194:9091/metrics/job/gitleaks
+                        '''
                     }
                     post {
                         always {
@@ -88,8 +99,25 @@ pipeline {
                         sh 'echo "Running Code Scan with SonarCloud"'
 
                         sh '''
-                        sonar-scanner \
-                        -Dsonar.token=$SONAR_TOKEN
+                            sonar-scanner \
+                            -Dsonar.token=$SONAR_TOKEN
+                        '''
+                        sh '''
+                            curl -u $SONAR_TOKEN: \
+                            "https://sonarcloud.io/api/measures/component?component=learn-jenkins-app&metricKeys=coverage,bugs,vulnerabilities" \
+                            -o sonar.json
+
+                            BUGS=$(jq -r '.component.measures[] | select(.metric=="bugs").value' sonar.json)
+
+                            VULNS=$(jq -r '.component.measures[] | select(.metric=="vulnerabilities").value' sonar.json)
+
+                            cat <<EOF > sonar.prom
+                                    sonar_bugs $BUGS
+                                    sonar_vulnerabilities $VULNS
+                                    EOF
+
+                            curl --data-binary @sonar.prom \
+                            http://192.168.1.194:9091/metrics/job/sonar
                         '''
                     }
                 } 
@@ -111,6 +139,14 @@ pipeline {
                             --json \
                             --output semgrep-report.json \
                             /src
+                        '''
+                        sh '''
+                            TOTAL=$(jq '.results | length' semgrep-report.json)
+
+                            echo "semgrep_findings_total $TOTAL" > semgrep.prom
+
+                            curl --data-binary @semgrep.prom \
+                            http://192.168.1.194:9091/metrics/job/semgrep
                         '''
                     }
                      post {
@@ -140,6 +176,19 @@ pipeline {
                             --format json \
                             --output trivy-report.json \
                             .
+                        '''
+                        sh '''
+                            CRITICAL=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-report.json)
+
+                            HIGH=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-report.json)
+
+                            cat <<EOF > trivy.prom
+                            trivy_critical $CRITICAL
+                            trivy_high $HIGH
+                            EOF
+
+                            curl --data-binary @trivy.prom \
+                            http://192.168.1.194:9091/metrics/job/trivy
                         '''
                     }
                     post {
@@ -174,7 +223,15 @@ pipeline {
 
                             kill $SERVER_PID
 
-                        '''  
+                        '''
+                        sh '''
+                            TOTAL=$(find test-results -name "*.xml" | wc -l)
+
+                            echo "playwright_tests_total $TOTAL" > playwright.prom
+
+                            curl --data-binary @playwright.prom \
+                            http://192.168.1.194:9091/metrics/job/playwright
+                        '''
                     }
                     post {
                         always {
@@ -203,6 +260,14 @@ pipeline {
 
                         sh '''
                             CI=true npm run test:ci
+                        '''
+                        sh '''
+                            COVERAGE=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+
+                            echo "coverage_percent $COVERAGE" > coverage.prom
+
+                            curl --data-binary @coverage.prom \
+                            http://192.168.1.194:9091/metrics/job/coverage
                         '''
                     }
                     post {
@@ -339,7 +404,17 @@ pipeline {
     }
     post { 
         always { 
-            cleanWs() 
+            cleanWs()
+            script {
+                def duration = System.currentTimeMillis() - BUILD_START.toLong()
+
+                sh """
+                echo "pipeline_duration_ms ${duration}" > pipeline.prom
+
+                curl --data-binary @pipeline.prom \
+                http://192.168.1.194:9091/metrics/job/pipeline
+                """
+            }
         } 
     }    
 }
