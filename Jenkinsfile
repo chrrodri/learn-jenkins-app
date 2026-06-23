@@ -29,8 +29,8 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'us-east-1'
-        AWS_DIST_ID           = 'E1UGPYRQOBYME'
-        AWS_CLOUDFRONT_URL     = 'dhok046xiflgh.cloudfront.net'
+        AWS_DIST_ID           = 'E14DJLE76ZBLY5'
+        AWS_CLOUDFRONT_URL    = 'deegnr78of0qk.cloudfront.net'
 
     }
 
@@ -39,21 +39,6 @@ pipeline {
         stage('BUILD') {
 
              stages {
-                /*stage('Install Dependencies') {
-                    agent {
-                        docker {
-                            image "${NODE_IMAGE}"
-                            args '-v npm-cache:/root/.npm'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh '''
-                            npm install
-                            npm ci --prefer-offline --no-audit
-                        '''
-                    }
-                }  */  
 
                  stage('Sast Secret Scan') {
                     agent {
@@ -240,16 +225,10 @@ pipeline {
                         sh '''
                             export REACT_APP_VERSION=${APP_VERSION}
                             npm run build                            
-                        ''' //tar -czf build-${APP_VERSION}.tar.gz build
-                        
+                        '''    
                     }
                     post {
                         success {
-                             /*archiveArtifacts(
-                                artifacts: '*.tar.gz',
-                                fingerprint: true
-                            ) */
-
                             archiveArtifacts(
                                 artifacts: 'build/**',
                                 fingerprint: true
@@ -324,7 +303,6 @@ pipeline {
                             def endTime = System.currentTimeMillis()
                             def durationSeconds = (endTime - startTime) / 1000
 
-
                             //
                             // Crear archivo Prometheus
                             //
@@ -378,9 +356,6 @@ pipeline {
 
                                 echo "Cloudfront URL: https://$AWS_CLOUDFRONT_URL"
                             '''
-                                /* aws s3 cp \
-                                build-${APP_VERSION}.tar.gz \
-                                s3://chrrodri-build-artifacts/build-${APP_VERSION}.tar.gz */
                         }
                     }
                 }
