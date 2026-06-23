@@ -272,6 +272,11 @@ pipeline {
                         script {
 
                             //
+                            // START TIME PIPELINE
+                            //
+                            def startTime = currentBuild.startTimeInMillis
+
+                            //
                             // Gitleaks
                             //
                             def gitleaksReport = readJSON file: 'gitleaks-report.json'
@@ -314,6 +319,14 @@ pipeline {
                             //def coverage = readJSON file: 'coverage/coverage-summary.json'
                             //def coveragePercent = coverage.total.lines.pct
                 //coverage_percent ${coveragePercent}
+
+                            //
+                            // END TIME + DURATION
+                            //
+                            def endTime = System.currentTimeMillis()
+                            def durationSeconds = (endTime - startTime) / 1000
+
+
                             //
                             // Crear archivo Prometheus
                             //
@@ -324,7 +337,7 @@ pipeline {
                 semgrep_findings_total ${semgrepFindings}
                 trivy_critical ${critical}
                 trivy_high ${high}
-
+                pipeline_duration_seconds ${durationSeconds}
                 """
                             )
                                 sh '''
