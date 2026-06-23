@@ -165,7 +165,7 @@ pipeline {
                         sh 'echo "Running E2E Tests with Playwright"'
                         
                         sh '''
-                            npm run build
+                            
 
                             npx serve -s build -l 3000 &
                             SERVER_PID=$!
