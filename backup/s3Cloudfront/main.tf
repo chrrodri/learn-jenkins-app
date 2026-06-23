@@ -15,6 +15,7 @@ provider "aws" {
 
 resource "aws_s3_bucket" "frontend" {
   bucket = "chrrodri-learn-jenkins-app"
+  force_destroy = true
 
   tags = {
     Name        = "build-learn-jenkins-app"
