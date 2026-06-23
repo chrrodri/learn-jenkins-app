@@ -202,6 +202,7 @@ pipeline {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
+                            args '--entrypoint="" --user root'
                             reuseNode true
                         }
                     }
@@ -263,7 +264,7 @@ pipeline {
                     agent {
                         docker {
                             image "${NODE_IMAGE}"
-                            args '--entrypoint=""'
+                            args '--entrypoint="" --user root'
                             reuseNode true
                         }
                     }
