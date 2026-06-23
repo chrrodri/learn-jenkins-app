@@ -418,16 +418,6 @@ pipeline {
     }
     post { 
         always { 
-            script {
-                def duration = System.currentTimeMillis() - BUILD_START.toLong()
-
-                sh """
-                echo "pipeline_duration_ms ${duration}" > pipeline.prom
-
-                curl --data-binary @pipeline.prom \
-                http://192.168.1.194:9091/metrics/job/pipeline
-                """
-            }
             cleanWs()
         } 
     }    
