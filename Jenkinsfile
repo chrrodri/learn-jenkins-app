@@ -149,6 +149,8 @@ pipeline {
                         
                         sh '''
                             
+                            npm ci
+
                             npm run build
 
                             npx serve -s build -l 3000 &

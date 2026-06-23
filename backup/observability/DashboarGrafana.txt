@@ -1,0 +1,65 @@
+{
+  "title": "Jenkins Security & Pipeline Dashboard",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Pipeline Duration (s)",
+      "targets": [
+        {
+          "expr": "pipeline_duration_seconds"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Gitleaks Findings",
+      "targets": [
+        {
+          "expr": "gitleaks_findings_total"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Semgrep Findings",
+      "targets": [
+        {
+          "expr": "semgrep_findings_total"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Trivy Critical",
+      "targets": [
+        {
+          "expr": "trivy_critical"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "type": "stat",
+      "title": "Trivy High",
+      "targets": [
+        {
+          "expr": "trivy_high"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 4, "w": 6, "h": 4 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Pipeline Duration Trend",
+      "targets": [
+        {
+          "expr": "pipeline_duration_seconds"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 6 }
+    }
+  ]
+}
