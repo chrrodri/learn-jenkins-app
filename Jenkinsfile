@@ -157,7 +157,7 @@ pipeline {
                     agent {
                         docker {
                             image "${PLAYWRIGHT_IMAGE}"
-                            args '--entrypoint=""'
+                            args '--entrypoint="" --user root'
                             reuseNode true
                         }
                     }  
@@ -166,13 +166,16 @@ pipeline {
                         
                         sh '''
                             
+                            npm run build
 
                             npx serve -s build -l 3000 &
                             SERVER_PID=$!
 
-                            sleep 20
-
-                            curl http://localhost:3000
+                            # Espera activa (más estable que sleep fijo)
+                            for i in $(seq 1 30); do
+                            curl -s http://localhost:3000 && break
+                            sleep 2
+                            done
 
                             npx playwright test 
 
